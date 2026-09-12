@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>BoneAppetit</AssemblyName>
+    <RootNamespace>
+    </RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <Optimize>true</Optimize>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BepInExCoreDir Condition="'$(BepInExCoreDir)' == ''">$(BEPINEX_CORE_DIR)</BepInExCoreDir>
+    <JotunnDir Condition="'$(JotunnDir)' == ''">$(JOTUNN_DIR)</JotunnDir>
+    <ValheimManagedDir Condition="'$(ValheimManagedDir)' == ''">$(VALHEIM_MANAGED_DIR)</ValheimManagedDir>
+    <NoWarn>$(NoWarn);0169;0414;0649</NoWarn>
+  </PropertyGroup>
+  <Target Name="ValidateReferencePaths" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(BepInExCoreDir)\BepInEx.dll')" Text="Set BepInExCoreDir or BEPINEX_CORE_DIR to the BepInEx core directory." />
+    <Error Condition="!Exists('$(JotunnDir)\Jotunn.dll')" Text="Set JotunnDir or JOTUNN_DIR to the Jotunn plugin directory." />
+    <Error Condition="!Exists('$(ValheimManagedDir)\assembly_valheim.dll')" Text="Set ValheimManagedDir or VALHEIM_MANAGED_DIR to Valheim's Managed directory." />
+  </Target>
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCoreDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Jotunn">
+      <HintPath>$(JotunnDir)\Jotunn.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_valheim">
+      <HintPath>$(ValheimManagedDir)\assembly_valheim.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_googleanalytics">
+      <HintPath>$(ValheimManagedDir)\assembly_googleanalytics.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_utils">
+      <HintPath>$(ValheimManagedDir)\assembly_utils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BoneAppetit.customfood" LogicalName="BoneAppetit.customfood" />
+    <EmbeddedResource Include="BoneAppetit.grill" LogicalName="BoneAppetit.grill" />
+  </ItemGroup>
+</Project>

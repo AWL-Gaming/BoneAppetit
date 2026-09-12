@@ -1,0 +1,40 @@
+using System;
+
+[Serializable]
+internal enum ShaderType
+{
+	Alpha,
+	Blob,
+	Bonemass,
+	Clouds,
+	Creature,
+	Decal,
+	Distortion,
+	Flow,
+	FlowOpaque,
+	Grass,
+	GuiScroll,
+	HeightMap,
+	Icon,
+	InteriorSide,
+	LitGui,
+	LitParticles,
+	MapShader,
+	ParticleDetail,
+	Piece,
+	Player,
+	Rug,
+	ShadowBlob,
+	SkyboxProcedural,
+	SkyObject,
+	StaticRock,
+	Tar,
+	TrilinearMap,
+	BGBlur,
+	Water,
+	WaterBottom,
+	WaterMask,
+	Yggdrasil,
+	YggdrasilRoot,
+	ToonDeferredShading2017
+}
