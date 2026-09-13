@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.4
+3.3.5
 
 ## Package requirements
 
@@ -24,6 +24,6 @@ Before publication, verify the rendered README, dependency versions, package ver
 
 Thunderstore and Hexium versions are immutable. Bump the package version for any later package-content update. Bump the plugin version only when the plugin binary version changes.
 
-## 3.3.4 package revision
+## 3.3.5 package revision
 
-3.3.4 is a storefront package-only revision. It retains the tested BoneAppetit 3.3.3 plugin binary and therefore does not change the BepInEx plugin version or gameplay behavior.
+3.3.5 is a storefront package-only revision. It retains the tested BoneAppetit 3.3.3 plugin binary and therefore does not change the BepInEx plugin version or gameplay behavior.
