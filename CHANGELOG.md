@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 ## 3.3.3 - 2026-09-13
 
