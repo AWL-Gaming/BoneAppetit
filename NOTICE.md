@@ -1,14 +1,18 @@
-﻿# Attribution and provenance notice
+# Attribution, license, and maintenance notice
 
-BoneAppetit was originally authored by **RockerKitten**:
+BoneAppetit was originally authored by **RockerKitten**.
 
 - Original repository: https://github.com/RockerKitten/BoneAppetit
-- Published 3.3.1 package identifies the same repository as its project website.
+- Original Thunderstore package: https://thunderstore.io/c/valheim/p/RockerKitten/BoneAppetit/
+- AWL maintained source: https://github.com/AWL-Gaming/BoneAppetit
+- AWL Gaming website: https://awlgaming.net
 
-This repository is an AWL Gaming maintenance fork for current Valheim compatibility. AWL Gaming does not claim authorship of the upstream BoneAppetit implementation or assets.
+This repository and package are an AWL Gaming compatibility maintenance fork/build for current Valheim releases. AWL Gaming does not claim authorship of the original implementation, foods, stations, assets, recipes, balance, or gameplay design and does not imply endorsement by the original author.
 
-The upstream repository contains the WTFPL Version 2 license, retained verbatim in this repository as `LICENSE`.
+The upstream repository contains the **WTFPL Version 2** license. The license text is retained verbatim in `LICENSE`.
 
-The public upstream source tree currently identifies its plugin source as version 3.2.4, while the published BoneAppetit package is version 3.3.1. To avoid regressing released content, the AWL 3.3.2 maintenance source was reconstructed from the published 3.3.1 assembly/package while preserving its embedded `BoneAppetit.customfood` and `BoneAppetit.grill` resources.
+The public upstream source tree currently identifies its plugin source as version 3.2.4, while the published BoneAppetit package is version 3.3.1. To avoid regressing released content, AWL 3.3.2 was reconstructed from the published 3.3.1 package while preserving its embedded `BoneAppetit.customfood` and `BoneAppetit.grill` resources.
 
-AWL Gaming's 3.3.2 maintenance work updates the project and compatibility surface for the current Valheim 1.0, BepInEx, and Jotunn stack without intentionally changing BoneAppetit's gameplay balance or content set.
+Optional support for AWL's compatibility maintenance and testing: https://patreon.awlgaming.net
+
+Issues with the AWL-maintained build can be reported at https://github.com/AWL-Gaming/BoneAppetit/issues or through https://awlgaming.net.

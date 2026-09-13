@@ -1,38 +1,52 @@
-﻿# BoneAppetit
+# BoneAppetit
 
-AWL Gaming maintains this compatibility build of RockerKitten's BoneAppetit for current Valheim versions.
+**AWL Gaming maintained compatibility build for current Valheim releases.**
 
-BoneAppetit provides its own food progression, Grill, Griddle, Prep Table, cooking skill integration, drops, and related content. Valharvest detects and integrates with BoneAppetit but does not replace this content.
+BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains this build because the published 3.3.1 package provides content that is still used by current modpacks but required compatibility work for current Valheim. AWL Gaming does not claim authorship of the original foods, stations, assets, recipes, balance, or gameplay design.
 
-## AWL maintenance release
+## What it adds
 
-Version 3.3.2 is based on the published BoneAppetit 3.3.1 package and preserves its embedded `customfood` and `grill` asset bundles. The public upstream source tree currently identifies its plugin source as 3.2.4, so the 3.3.1 published package was used as the compatibility baseline rather than silently downgrading content.
+- BoneAppetit's food progression and creature drops.
+- Grill, Griddle, and Prep Table stations.
+- Cooking integration, recipes, items, and associated assets.
+- Compatibility used by Valharvest when BoneAppetit is installed.
 
-Validated on the current AWL Valheim 1.0 stack with BepInEx 5.4.23.5 and Jotunn 2.30.0. Runtime validation confirmed the Grill, Griddle, Prep Table, representative food/item prefabs, ObjectDB item registration, Jotunn registration, and Valharvest compatibility detection.
+Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## Build
+## AWL 3.3.2 compatibility work
 
-Requirements:
+- Reconstructed from the actual published BoneAppetit 3.3.1 package because the public upstream source tree still identifies its plugin source as 3.2.4.
+- Preserved the published `customfood` and `grill` embedded asset bundles byte-for-byte.
+- Preserved Grill, Griddle, Prep Table, foods, items, drops, cooking integration, and released gameplay content.
+- Runtime-validated Jotunn registration, ObjectDB item registration, representative food/item prefabs, all three stations, and Valharvest compatibility detection.
+- Builds cleanly against current Valheim, BepInEx 5.4.23.5, Harmony 2.9.0, and Jotunn 2.30.0.
 
-- .NET SDK capable of targeting .NET Framework 4.7.2
-- Current BepInEx core assemblies
-- Jotunn
-- Current Valheim dedicated-server managed assemblies
+## Installation
 
-Set either MSBuild properties or environment variables:
+Install on both the server and every client that connects to it. Jotunn and BepInEx are required and are declared as package dependencies.
 
-- `BepInExCoreDir` or `BEPINEX_CORE_DIR`: directory containing `BepInEx.dll` and `0Harmony.dll`
-- `JotunnDir` or `JOTUNN_DIR`: directory containing `Jotunn.dll`
-- `ValheimManagedDir` or `VALHEIM_MANAGED_DIR`: Valheim `valheim_server_Data\Managed` directory
+## AWL maintenance and support
 
-Then run:
+- AWL Gaming website: https://awlgaming.net
+- Maintained source: https://github.com/AWL-Gaming/BoneAppetit
+- Bug reports for this maintained build: https://github.com/AWL-Gaming/BoneAppetit/issues
+- Optional support for AWL compatibility maintenance and testing: https://patreon.awlgaming.net
+
+Support is optional and is for AWL's compatibility, testing, packaging, and maintenance work on this fork. The mod remains available regardless of support.
+
+## Original project and attribution
+
+- Original author: RockerKitten
+- Original source: https://github.com/RockerKitten/BoneAppetit
+- Original Thunderstore package: https://thunderstore.io/c/valheim/p/RockerKitten/BoneAppetit/
+- Upstream license: WTFPL Version 2, preserved in `LICENSE`.
+
+The original project README is retained in the source repository as `README_UPSTREAM.md` for historical documentation and credits.
+
+## Source and build
+
+The maintained source is public in the AWL repository above. Build requirements are .NET Framework 4.7.2 targeting support, BepInEx core assemblies, Jotunn, and current Valheim managed assemblies.
 
 ```powershell
 dotnet build .\BoneAppetit.csproj -c Release
 ```
-
-## Upstream and license
-
-Original project: https://github.com/RockerKitten/BoneAppetit
-
-The upstream repository is distributed under the WTFPL v2. The upstream license is retained verbatim in `LICENSE`. See `NOTICE.md` for provenance of the 3.3.2 maintenance build.
