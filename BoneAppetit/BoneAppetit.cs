@@ -18,7 +18,7 @@ using Logger = Jotunn.Logger;
 
 namespace Boneappetit;
 
-[BepInPlugin("com.rockerkitten.boneappetit", "BoneAppetit", "3.3.2")]
+[BepInPlugin("com.rockerkitten.boneappetit", "BoneAppetit", "3.3.3")]
 [BepInDependency(Jotunn.Main.ModGuid)]
 [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
 public class BoneAppetit : BaseUnityPlugin
@@ -27,7 +27,7 @@ public class BoneAppetit : BaseUnityPlugin
 
 	public const string PluginName = "BoneAppetit";
 
-	public const string PluginVersion = "3.3.2";
+	public const string PluginVersion = "3.3.3";
 
 	public AssetBundle GrillAssetBundle;
 

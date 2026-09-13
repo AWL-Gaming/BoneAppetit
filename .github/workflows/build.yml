@@ -64,5 +64,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: BoneAppetit-3.3.2
+          name: BoneAppetit-3.3.3
           path: bin/Release/net472/BoneAppetit.dll

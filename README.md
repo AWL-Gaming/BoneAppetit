@@ -13,8 +13,9 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.2 compatibility work
+## AWL 3.3.3 maintained release
 
+- 3.3.3 keeps the validated 3.3.2 gameplay content and adds the standard AWL Gaming storefront badge; gameplay behavior is unchanged.
 - Reconstructed from the actual published BoneAppetit 3.3.1 package because the public upstream source tree still identifies its plugin source as 3.2.4.
 - Preserved the published `customfood` and `grill` embedded asset bundles byte-for-byte.
 - Preserved Grill, Griddle, Prep Table, foods, items, drops, cooking integration, and released gameplay content.
