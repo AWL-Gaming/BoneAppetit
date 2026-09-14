@@ -1,18 +1,32 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Boneappetit;
 
-public static class RandomJuliaChildPhrase
+internal static class RandomJuliaChildPhrase
 {
-	private static readonly List<string> PhrasesList = new List<string>
-	{
-		"No one is born a great cook, one learns by doing. - Julia Child", "You don’t have to cook fancy or complicated masterpieces, just good food from fresh ingredients. - Julia Child", "People who love to eat are always the best people. - Julia Child", "Cooking well doesn’t mean cooking fancy. - Julia Child", "The only time to eat diet food is while you’re waiting for the steak to cook. - Julia Child", "Until I discovered cooking, I was never really interested in anything. - Julia Child", "You are the butter to my bread, and the breath to my life. - Julia Child", "Fat gives things flavor. - Julia Child", "If you’re afraid of butter, use cream. - Julia Child", "I was 32 when I started cooking; up until then, I just ate. - Julia Child",
-		"A party without cake is just a meeting. - Julia Child", "The only real stumbling block is fear of failure. In cooking you’ve got to have a what-the-hell attitude. - Julia Child", "In France, cooking is a serious art form and a national sport. - Julia Child", "You are the BOSS of that dough. - Julia Child", "with enough butter anything is good. - Julia Child", "Usually, one’s cooking is better than one thinks it is. - Julia Child"
-	};
+    private static readonly List<string> Phrases = new List<string>
+    {
+        "The only time to eat diet food is while you're waiting for the steak to cook.",
+        "If you're afraid of butter, use cream.",
+        "A party without cake is just a meeting.",
+        "Everything in moderation... including moderation.",
+        "With enough butter, anything is good.",
+        "People who love to eat are always the best people.",
+        "No matter what happens in the kitchen, never apologize.",
+        "Always remember: If you're alone in the kitchen and you drop the lamb, you can always just pick it up. Who's going to know?",
+        "You don't have to cook fancy or complicated masterpieces, just good food from fresh ingredients.",
+        "This is my invariable advice to people: Learn how to cook, try new recipes, learn from your mistakes, be fearless, and above all have fun!",
+        "The best way to execute French cooking is to get good and loaded and whack the hell out of a chicken.",
+        "It's so beautifully arranged on the plate, you know someone's fingers have been all over it.",
+        "Just like becoming an expert in wine, you learn by drinking it, the best you can afford.",
+        "The secret of a happy marriage is finding the right person. You know they're right if you love to be with them all the time.",
+        "I think every woman should have a blowtorch.",
+        "You'll never know everything about anything, especially something you love."
+    };
 
-	public static string GetRandomPhrase()
-	{
-		return PhrasesList[Random.Range(0, PhrasesList.Count - 1)];
-	}
+    internal static string GetRandomPhrase()
+    {
+        return Phrases[Random.Range(0, Phrases.Count)];
+    }
 }

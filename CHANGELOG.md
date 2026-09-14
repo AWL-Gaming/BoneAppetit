@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.7 - 2026-09-14
+
+### Fixed
+- Fixed the Chef Hat failing when equipped on current Valheim releases.
+- Fixed BoneAppetit foods, items, and cooking stations loading against the current Valheim runtime.
+- Fixed the Stone Griddle incorrectly requiring a forge for placement.
+- Preserved the existing recipes, food balance, drops, cooking skill behavior, and Valharvest integration.
+
 ## 3.3.2 - 2026-09-13
 
 ### Fixed

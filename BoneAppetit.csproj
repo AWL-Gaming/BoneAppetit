@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>BoneAppetit</AssemblyName>
@@ -66,7 +66,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="BoneAppetit.customfood" LogicalName="BoneAppetit.customfood" />
-    <EmbeddedResource Include="BoneAppetit.grill" LogicalName="BoneAppetit.grill" />
+    <EmbeddedResource Include="BoneAppetit.assets" LogicalName="BoneAppetit.assets" />
+    <Compile Remove="Unity_Project\**\*.cs" />
   </ItemGroup>
 </Project>

@@ -13,14 +13,14 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.3 maintained release
+## AWL 3.3.7 maintained release
 
-- 3.3.3 keeps the validated 3.3.2 gameplay content and adds the standard AWL Gaming storefront badge; gameplay behavior is unchanged.
-- Reconstructed from the actual published BoneAppetit 3.3.1 package because the public upstream source tree still identifies its plugin source as 3.2.4.
-- Preserved the published `customfood` and `grill` embedded asset bundles byte-for-byte.
-- Preserved Grill, Griddle, Prep Table, foods, items, drops, cooking integration, and released gameplay content.
-- Runtime-validated Jotunn registration, ObjectDB item registration, representative food/item prefabs, all three stations, and Valharvest compatibility detection.
-- Builds cleanly against current Valheim, BepInEx 5.4.23.5, Harmony 2.9.0, and Jotunn 2.30.0.
+- Updated BoneAppetit for current Valheim releases while preserving the original food progression, recipes, drops, cooking stations, and cooking skill behavior.
+- Fixed the Chef Hat so it can be equipped normally again.
+- Fixed the Stone Griddle so it no longer incorrectly requires a forge for placement.
+- Preserved Valharvest compatibility when both mods are installed.
+- Compatible with current Valheim releases and Jotunn 2.30.0.
+- Reconstructed from the published BoneAppetit package while retaining original author attribution and the upstream license.
 
 ## Installation
 

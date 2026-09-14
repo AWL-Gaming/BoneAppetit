@@ -27,3 +27,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.5 package revision
 
 3.3.5 is a storefront package-only revision. It retains the tested BoneAppetit 3.3.3 plugin binary and therefore does not change the BepInEx plugin version or gameplay behavior.
+
+## 3.3.7 runtime release
+
+3.3.7 contains the tested BoneAppetit 3.3.3 plugin binary. This release fixes current Valheim compatibility issues affecting asset loading, Chef Hat equipping, and the Stone Griddle placement requirement while preserving the existing food, recipe, drop, cooking-skill, and Valharvest integration behavior.
