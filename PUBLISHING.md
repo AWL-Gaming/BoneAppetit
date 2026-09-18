@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.8
+3.3.9
 
 ## Package requirements
 
@@ -35,3 +35,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.8 maintenance release
 
 3.3.8 fixes cooking-station visual scale, current Valheim material lighting, and adds external JSON translations loaded through Jotunn.
+
+## 3.3.9 maintenance release
+
+3.3.9 fixes localization token resolution and translation-file loading, corrects Chef Hat and smokeless-fire material lighting, fixes the Oven scale, and restores the Stone Griddle as its own buildable networked piece at the original size.

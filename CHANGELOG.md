@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.3.9 - 2026-09-18
+
+### Added
+- Added editable JSON localization support for BoneAppetit item and build-piece text.
+
+### Fixed
+- Fixed localization tokens appearing as raw text in-game and made translation JSON files work from both the Translations folder and beside BoneAppetit.dll.
+- Fixed dim or discolored materials on the Chef Hat and smokeless fire pieces.
+- Fixed the Oven appearing at the wrong size.
+- Restored the Stone Griddle as its own buildable networked piece at its original size so it appears correctly in the Hammer menu and prefab tools.
+
 ## 3.3.8 - 2026-09-18
 
 ### Added

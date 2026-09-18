@@ -23,8 +23,9 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.8";
+    public const string PluginVersion = "3.3.9";
     private const string BundleResourceName = "BoneAppetit.assets";
+    private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";
     private const string HammerPieceTable = "_HammerPieceTable";
 
@@ -33,6 +34,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
     private readonly Dictionary<ConeEffect, SE_Stats> _coneEffects = new Dictionary<ConeEffect, SE_Stats>();
     private Harmony _harmony;
     private AssetBundle _assets;
+    private AssetBundle _legacyGrillAssets;
     private bool _dropsApplied;
     private bool _addingExtraItem;
     private bool? _appliedOriginalGrill;
@@ -79,10 +81,12 @@ public sealed class BoneAppetit : BaseUnityPlugin
     private void Awake()
     {
         Instance = this;
+        RegisterBuiltInEnglishTranslations();
         LoadTranslations();
         CreateConfigValues();
-        _assets = LoadEmbeddedAssetBundle();
-        if (_assets == null)
+        _assets = LoadEmbeddedAssetBundle(BundleResourceName);
+        _legacyGrillAssets = LoadEmbeddedAssetBundle(LegacyGrillResourceName);
+        if (_assets == null || _legacyGrillAssets == null)
         {
             Logger.LogError("BoneAppetit could not load its Unity 6000 asset bundle.");
             return;
@@ -92,25 +96,59 @@ public sealed class BoneAppetit : BaseUnityPlugin
         PrefabManager.OnVanillaPrefabsAvailable += RegisterRuntimeContent;
         ItemManager.OnItemsRegistered += AddDrops;
         SynchronizationManager.OnConfigurationSynchronized += OnConfigurationSynchronized;
+        PieceManager.OnPiecesRegistered += EnsureGriddleRegistered;
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginGUID);
         Logger.LogInfo("BoneAppetit modern runtime initialized.");
+    }
+
+    private static string TokenKey(string prefab, string field) => "boneappetit_" + prefab + "_" + field;
+    private static string Token(string prefab, string field) => "$" + TokenKey(prefab, field);
+
+    private void RegisterBuiltInEnglishTranslations()
+    {
+        foreach (ItemDefinition definition in BoneAppetitData.Items)
+        {
+            LocalizationManager.Instance.AddToken(TokenKey(definition.Prefab, "name"), definition.Name, true);
+            LocalizationManager.Instance.AddToken(TokenKey(definition.Prefab, "description"), definition.Description ?? string.Empty, true);
+        }
+
+        RegisterPieceEnglish("rk_grill", "Grill");
+        RegisterPieceEnglish("rk_griddle", "Stone Griddle");
+        RegisterPieceEnglish("rk_prep", "Prep Table");
+        RegisterPieceEnglish("rk_oven", "Oven");
+        RegisterPieceEnglish("rk_campfire", "Smokeless Firepit");
+        RegisterPieceEnglish("rk_hearth", "Smokeless Hearth");
+        RegisterPieceEnglish("rk_brazier", "Smokeless Brazier");
+    }
+
+    private static void RegisterPieceEnglish(string prefab, string name)
+    {
+        LocalizationManager.Instance.AddToken(TokenKey(prefab, "name"), name, true);
+        LocalizationManager.Instance.AddToken(TokenKey(prefab, "description"), string.Empty, true);
     }
 
     private void LoadTranslations()
     {
         string pluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
         string translationsDirectory = Path.Combine(pluginDirectory, "Translations");
-        if (!Directory.Exists(translationsDirectory))
+        var translationFiles = new List<string>();
+
+        if (Directory.Exists(translationsDirectory))
         {
-            Logger.LogWarning("BoneAppetit Translations folder was not found.");
-            return;
+            translationFiles.AddRange(Directory.GetFiles(translationsDirectory, "*.json", SearchOption.AllDirectories));
         }
 
-        foreach (string file in Directory.GetFiles(translationsDirectory, "*.json"))
+        translationFiles.AddRange(
+            Directory.GetFiles(pluginDirectory, "*.json", SearchOption.TopDirectoryOnly)
+                .Where(file => !string.Equals(Path.GetFileName(file), "manifest.json", StringComparison.OrdinalIgnoreCase)));
+
+        foreach (string file in translationFiles.Distinct(StringComparer.OrdinalIgnoreCase))
         {
             try
             {
-                LocalizationManager.Instance.GetLocalization().AddFileByPath(file, true);
+                string language = ResolveTranslationLanguage(file, translationsDirectory);
+                LocalizationManager.Instance.AddJson(language, File.ReadAllText(file));
+                Logger.LogInfo("BoneAppetit loaded " + language + " translations from " + Path.GetFileName(file) + ".");
             }
             catch (Exception ex)
             {
@@ -119,14 +157,29 @@ public sealed class BoneAppetit : BaseUnityPlugin
         }
     }
 
-    private static string Token(string prefab, string field) => "$boneappetit_" + prefab + "_" + field;
+    private static string ResolveTranslationLanguage(string file, string translationsDirectory)
+    {
+        string directory = Path.GetDirectoryName(file) ?? string.Empty;
+        if (Directory.Exists(translationsDirectory) &&
+            directory.StartsWith(translationsDirectory, StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(directory, translationsDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            return new DirectoryInfo(directory).Name;
+        }
+
+        string name = Path.GetFileNameWithoutExtension(file);
+        const string prefix = "BoneAppetit.";
+        return name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? name.Substring(prefix.Length) : name;
+    }
     private void OnDestroy()
     {
         PrefabManager.OnVanillaPrefabsAvailable -= RegisterRuntimeContent;
         ItemManager.OnItemsRegistered -= AddDrops;
         SynchronizationManager.OnConfigurationSynchronized -= OnConfigurationSynchronized;
+        PieceManager.OnPiecesRegistered -= EnsureGriddleRegistered;
         _harmony?.UnpatchSelf();
         _assets?.Unload(false);
+        _legacyGrillAssets?.Unload(false);
         if (ReferenceEquals(Instance, this)) Instance = null;
     }
 
@@ -327,12 +380,88 @@ public sealed class BoneAppetit : BaseUnityPlugin
     private void RegisterPieces()
     {
         RegisterCraftingStation("rk_grill", "Grill", "forge", true, GrillOriginal.Value ? "rk_grill_original" : "rk_grill_custom", Req("Stone", 10), Req("Iron", 2));
-        RegisterCraftingStation("rk_griddle", "Stone Griddle", string.Empty, true, "rk_griddle", Req("Stone", 10));
+        RegisterGriddle();
         RegisterCraftingStation("rk_prep", "Prep Table", "forge", false, "rk_prep", Req("Wood", 4), Req("Tin", 5), Req("Stone", 3));
         RegisterOven();
         RegisterSmokelessFire("rk_campfire", "Smokeless Firepit", "fire_pit", string.Empty, "rk_campfire", Req("Stone", 5), Req("Wood", 2));
         RegisterSmokelessFire("rk_hearth", "Smokeless Hearth", "hearth", "piece_stonecutter", "rk_hearth", Req("Stone", 15));
         RegisterSmokelessFire("rk_brazier", "Smokeless Brazier", "piece_brazierceiling01", "forge", "rk_brazier", Req("Bronze", 5), Req("Coal", 2), Req("Chain", 1));
+    }
+
+    private void RegisterGriddle()
+    {
+        const string prefabName = "rk_griddle";
+        string localizedName = Token(prefabName, "name");
+        string localizedDescription = Token(prefabName, "description");
+        var config = new PieceConfig
+        {
+            Name = localizedName,
+            Description = localizedDescription,
+            CraftingStation = string.Empty,
+            AllowedInDungeons = false,
+            Enabled = true,
+            PieceTable = HammerPieceTable,
+            Icon = LoadSprite("piece_icon_rk_griddle"),
+            Requirements = new[] { Req("Stone", 10) }
+        };
+
+        GameObject prefab = _legacyGrillAssets.LoadAsset<GameObject>(prefabName);
+        if (prefab == null) throw new InvalidOperationException("Missing original BoneAppetit prefab " + prefabName);
+
+        var customPiece = new CustomPiece(prefab, true, config);
+        CraftingStation station = prefab.GetComponent<CraftingStation>();
+        ZNetView zNetView = prefab.GetComponent<ZNetView>();
+        WearNTear wear = prefab.GetComponent<WearNTear>();
+        if (station == null || zNetView == null || wear == null)
+        {
+            throw new InvalidOperationException(prefabName + " is missing required build or network components.");
+        }
+
+        station.m_name = localizedName;
+        station.m_icon = config.Icon;
+        station.m_craftRequireRoof = false;
+        station.m_craftRequireFire = true;
+        customPiece.Piece.m_name = localizedName;
+        customPiece.Piece.m_description = localizedDescription;
+        customPiece.Piece.m_icon = config.Icon;
+        customPiece.Piece.m_craftingStation = null;
+
+        RestorePieceShaders(prefab);
+        AddPiece(customPiece);
+    }
+    private void EnsureGriddleRegistered()
+    {
+        if (!_pieces.TryGetValue("rk_griddle", out CustomPiece customPiece) || customPiece?.PiecePrefab == null)
+        {
+            return;
+        }
+
+        GameObject prefab = customPiece.PiecePrefab;
+        PieceTable hammer = PieceManager.Instance.GetPieceTable(HammerPieceTable);
+        if (hammer == null)
+        {
+            Logger.LogWarning("Stone Griddle could not find the Hammer piece table during late registration.");
+            return;
+        }
+
+        bool addedToHammer = false;
+        bool addedToZNet = false;
+
+        if (!hammer.m_pieces.Contains(prefab))
+        {
+            PieceManager.Instance.RegisterPieceInPieceTable(prefab, HammerPieceTable);
+            addedToHammer = true;
+        }
+
+        if (ZNetScene.instance != null && ZNetScene.instance.GetPrefab(prefab.name) == null)
+        {
+            PrefabManager.Instance.RegisterToZNetScene(prefab);
+            addedToZNet = true;
+        }
+
+        Logger.LogInfo("Stone Griddle late registration: hammer=" + hammer.m_pieces.Contains(prefab) +
+            ", znet=" + (ZNetScene.instance != null && ZNetScene.instance.GetPrefab(prefab.name) != null) +
+            ", repairedHammer=" + addedToHammer + ", repairedZNet=" + addedToZNet + ".");
     }
 
     private void RegisterCraftingStation(string prefabName, string displayName, string buildStation, bool requiresFire, string visualName, params RequirementConfig[] requirements)
@@ -413,7 +542,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
                 Transform child = source.transform.GetChild(i);
                 if (child != sourceAttach) Instantiate(child.gameObject, target.transform, false);
             }
-            ApplyVisualShader(targetAttach.gameObject, "Custom/Player");
+            ApplyVisualShader(targetAttach.gameObject, "Custom/Creature");
             return;
         }
         GameObject visual = Instantiate(source, target.transform, false);
@@ -435,8 +564,8 @@ public sealed class BoneAppetit : BaseUnityPlugin
         visual.name = "BoneAppetitVisual";
         visual.transform.localPosition = source.transform.localPosition;
         visual.transform.localRotation = source.transform.localRotation;
-        visual.transform.localScale = source.transform.localScale;
-        ApplyVisualShader(visual, "Custom/Piece");
+        visual.transform.localScale = source.transform.localScale * ((visualName == "rk_oven" || visualName == "rk_griddle") ? 0.6f : 1f);
+        RestorePieceShaders(visual);
         foreach (ParticleSystem particle in visual.GetComponentsInChildren<ParticleSystem>(true))
         {
             particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -446,6 +575,37 @@ public sealed class BoneAppetit : BaseUnityPlugin
         foreach (Light light in visual.GetComponentsInChildren<Light>(true)) light.enabled = false;
     }
 
+    private static void RestorePieceShaders(GameObject root)
+    {
+        Shader staticRock = Shader.Find("Custom/StaticRock");
+        Shader standardTwoSided = Shader.Find("Standard TwoSided");
+        Shader standardSpecular = Shader.Find("Standard (Specular setup)");
+
+        foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+        {
+            foreach (Material material in renderer.sharedMaterials)
+            {
+                if (material == null) continue;
+                string name = material.name;
+
+                if ((name.StartsWith("stone_", StringComparison.Ordinal) ||
+                     name.StartsWith("stones_", StringComparison.Ordinal) ||
+                     name.StartsWith("GriddleRock", StringComparison.Ordinal)) &&
+                    staticRock != null)
+                {
+                    material.shader = staticRock;
+                }
+                else if (name.StartsWith("fireplace_ash_glowing_", StringComparison.Ordinal) && standardSpecular != null)
+                {
+                    material.shader = standardSpecular;
+                }
+                else if (name.StartsWith("fireplace_ash_", StringComparison.Ordinal) && standardTwoSided != null)
+                {
+                    material.shader = standardTwoSided;
+                }
+            }
+        }
+    }
     private static void ApplyVisualShader(GameObject root, string shaderName)
     {
         Shader shader = Shader.Find(shaderName);
@@ -465,14 +625,14 @@ public sealed class BoneAppetit : BaseUnityPlugin
         foreach (Light light in target.GetComponentsInChildren<Light>(true)) light.enabled = false;
     }
 
-    private static AssetBundle LoadEmbeddedAssetBundle()
+    private static AssetBundle LoadEmbeddedAssetBundle(string resourceName)
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        using (Stream stream = assembly.GetManifestResourceStream(BundleResourceName))
+        using (Stream stream = assembly.GetManifestResourceStream(resourceName))
         {
             if (stream == null)
             {
-                throw new InvalidOperationException("Embedded BoneAppetit asset bundle was not found.");
+                throw new InvalidOperationException("Embedded BoneAppetit asset bundle was not found: " + resourceName);
             }
 
             byte[] data = new byte[stream.Length];

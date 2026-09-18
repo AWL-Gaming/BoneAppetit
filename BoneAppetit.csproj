@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BoneAppetit.assets" LogicalName="BoneAppetit.assets" />
+    <EmbeddedResource Include="BoneAppetit.grill" LogicalName="BoneAppetit.grill" />
     <Compile Remove="Unity_Project\**\*.cs" />
   </ItemGroup>
 </Project>

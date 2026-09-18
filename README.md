@@ -13,18 +13,21 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.8 maintained release
+## AWL 3.3.9 maintained release
 
 - Updated BoneAppetit for current Valheim releases while preserving the original food progression, recipes, drops, cooking stations, and cooking skill behavior.
 - Fixed the Chef Hat so it can be equipped normally again.
 - Fixed the Stone Griddle so it no longer incorrectly requires a forge for placement.
+- Restored the Stone Griddle to the Hammer/build lists at its original size and fixed the Oven scale.
+- Fixed localization token display and translation-file loading for normal and flattened mod-manager installs.
+- Fixed dim or discolored materials on the Chef Hat and smokeless fire pieces.
 - Preserved Valharvest compatibility when both mods are installed.
 - Compatible with current Valheim releases and Jotunn 2.30.0.
 - Reconstructed from the published BoneAppetit package while retaining original author attribution and the upstream license.
 
 ## Localization
 
-BoneAppetit ships Translations/English.json as the translation template. Copy it to another JSON file in the same folder, keep the token keys unchanged, and translate the values. Jotunn loads the JSON translation files when BoneAppetit starts.
+BoneAppetit ships Translations/English.json as the translation template. Copy it to another JSON file, keep the token keys unchanged, and translate the values. Translation JSON files can be loaded from the Translations folder or beside BoneAppetit.dll so they continue to work with mod managers that flatten package folders.
 
 ## Installation
 
