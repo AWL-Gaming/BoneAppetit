@@ -1,10 +1,10 @@
-# Publishing BoneAppetit
+﻿# Publishing BoneAppetit
 
 ## Public identities
 
 - GitHub: https://github.com/AWL-Gaming/BoneAppetit
 - Thunderstore: AWLGaming/BoneAppetit in the Valheim community
-- Hexium: AWL/BoneAppetit in the Valheim community
+- Hexium: AWLGaming/BoneAppetit in the Valheim community
 - AWL Gaming: https://awlgaming.net
 - Optional AWL maintenance support: https://patreon.awlgaming.net
 
@@ -16,9 +16,9 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Package requirements
 
-The package root must contain manifest.json, README.md, icon.png, CHANGELOG.md, NOTICE.md, and BoneAppetit.dll. It must also contain LICENSE.
+The package root must contain manifest.json, README.md, icon.png, CHANGELOG.md, NOTICE.md, and BoneAppetit.dll. It must also contain LICENSE and Translations/English.json.
 
-Thunderstore namespace: AWLGaming. Hexium namespace: AWL. Install scope: Client & Server.
+Thunderstore namespace: AWLGaming. Hexium namespace: AWLGaming. Install scope: Client & Server.
 
 Before publication, verify the rendered README, dependency versions, package version, icon, source link, AWL website/support links, attribution, NOTICE/license status, and public download.
 
@@ -35,3 +35,4 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.8 maintenance release
 
 3.3.8 fixes cooking-station visual scale, current Valheim material lighting, and adds external JSON translations loaded through Jotunn.
+
