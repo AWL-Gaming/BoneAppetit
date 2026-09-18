@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.3";
+    public const string PluginVersion = "3.3.8";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string AssetRoot = "assets/boneappetit6000";
     private const string HammerPieceTable = "_HammerPieceTable";
@@ -79,6 +79,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
     private void Awake()
     {
         Instance = this;
+        LoadTranslations();
         CreateConfigValues();
         _assets = LoadEmbeddedAssetBundle();
         if (_assets == null)
@@ -95,6 +96,30 @@ public sealed class BoneAppetit : BaseUnityPlugin
         Logger.LogInfo("BoneAppetit modern runtime initialized.");
     }
 
+    private void LoadTranslations()
+    {
+        string pluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+        string translationsDirectory = Path.Combine(pluginDirectory, "Translations");
+        if (!Directory.Exists(translationsDirectory))
+        {
+            Logger.LogWarning("BoneAppetit Translations folder was not found.");
+            return;
+        }
+
+        foreach (string file in Directory.GetFiles(translationsDirectory, "*.json"))
+        {
+            try
+            {
+                LocalizationManager.Instance.GetLocalization().AddFileByPath(file, true);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning("BoneAppetit could not load translation file " + Path.GetFileName(file) + ": " + ex.Message);
+            }
+        }
+    }
+
+    private static string Token(string prefab, string field) => "$boneappetit_" + prefab + "_" + field;
     private void OnDestroy()
     {
         PrefabManager.OnVanillaPrefabsAvailable -= RegisterRuntimeContent;
@@ -196,8 +221,8 @@ public sealed class BoneAppetit : BaseUnityPlugin
             {
                 itemConfig = new ItemConfig
                 {
-                    Name = definition.Name,
-                    Description = definition.Description,
+                    Name = Token(definition.Prefab, "name"),
+                    Description = Token(definition.Prefab, "description"),
                     Enabled = definition.Enabled(this),
                     Amount = definition.Recipe.Amount,
                     CraftingStation = definition.Recipe.Station,
@@ -220,8 +245,8 @@ public sealed class BoneAppetit : BaseUnityPlugin
     {
         ItemDrop.ItemData.SharedData shared = item.ItemDrop.m_itemData.m_shared;
         Sprite icon = LoadSprite("icon_" + definition.Prefab);
-        shared.m_name = definition.Name;
-        shared.m_description = definition.Description;
+        shared.m_name = Token(definition.Prefab, "name");
+        shared.m_description = Token(definition.Prefab, "description");
         shared.m_itemType = definition.ItemType;
         shared.m_icons = new[] { icon };
         shared.m_maxStackSize = definition.StackSize;
@@ -312,17 +337,19 @@ public sealed class BoneAppetit : BaseUnityPlugin
 
     private void RegisterCraftingStation(string prefabName, string displayName, string buildStation, bool requiresFire, string visualName, params RequirementConfig[] requirements)
     {
-        var config = new PieceConfig { Name = displayName, Description = string.Empty, CraftingStation = buildStation, AllowedInDungeons = false, Enabled = true, PieceTable = HammerPieceTable, Icon = LoadSprite("piece_icon_" + prefabName), Requirements = requirements };
+        string localizedName = Token(prefabName, "name");
+        string localizedDescription = Token(prefabName, "description");
+        var config = new PieceConfig { Name = localizedName, Description = localizedDescription, CraftingStation = buildStation, AllowedInDungeons = false, Enabled = true, PieceTable = HammerPieceTable, Icon = LoadSprite("piece_icon_" + prefabName), Requirements = requirements };
         var customPiece = new CustomPiece(prefabName, "piece_cauldron", config);
         GameObject prefab = customPiece.PiecePrefab;
         CraftingStation station = prefab.GetComponent<CraftingStation>();
         if (station == null) throw new InvalidOperationException(prefabName + " did not inherit a current CraftingStation.");
-        station.m_name = displayName;
+        station.m_name = localizedName;
         station.m_icon = config.Icon;
         station.m_craftRequireRoof = false;
         station.m_craftRequireFire = requiresFire;
-        customPiece.Piece.m_name = displayName;
-        customPiece.Piece.m_description = string.Empty;
+        customPiece.Piece.m_name = localizedName;
+        customPiece.Piece.m_description = localizedDescription;
         customPiece.Piece.m_icon = config.Icon;
         if (string.IsNullOrEmpty(buildStation)) customPiece.Piece.m_craftingStation = null;
         ReplacePieceVisual(prefab, visualName);
@@ -331,10 +358,12 @@ public sealed class BoneAppetit : BaseUnityPlugin
 
     private void RegisterOven()
     {
-        var config = new PieceConfig { Name = "Oven", Description = string.Empty, CraftingStation = string.Empty, AllowedInDungeons = false, Enabled = true, PieceTable = HammerPieceTable, ExtendStation = "rk_grill", Icon = LoadSprite("piece_icon_rk_oven"), Requirements = new[] { Req("SurtlingCore", 2), Req("TrophySurtling", 1), Req("Stone", 10) } };
+        string localizedName = Token("rk_oven", "name");
+        string localizedDescription = Token("rk_oven", "description");
+        var config = new PieceConfig { Name = localizedName, Description = localizedDescription, CraftingStation = string.Empty, AllowedInDungeons = false, Enabled = true, PieceTable = HammerPieceTable, ExtendStation = "rk_grill", Icon = LoadSprite("piece_icon_rk_oven"), Requirements = new[] { Req("SurtlingCore", 2), Req("TrophySurtling", 1), Req("Stone", 10) } };
         var customPiece = new CustomPiece("rk_oven", "cauldron_ext1_spice", config);
-        customPiece.Piece.m_name = "Oven";
-        customPiece.Piece.m_description = string.Empty;
+        customPiece.Piece.m_name = localizedName;
+        customPiece.Piece.m_description = localizedDescription;
         customPiece.Piece.m_icon = config.Icon;
         StationExtension extension = customPiece.PiecePrefab.GetComponent<StationExtension>();
         if (extension == null) throw new InvalidOperationException("rk_oven did not inherit a current StationExtension.");
@@ -346,10 +375,12 @@ public sealed class BoneAppetit : BaseUnityPlugin
     private void RegisterSmokelessFire(string prefabName, string displayName, string basePrefab, string buildStation, string visualName, params RequirementConfig[] requirements)
     {
         Piece basePiece = PrefabManager.Instance.GetPrefab(basePrefab)?.GetComponent<Piece>();
-        var config = new PieceConfig { Name = displayName, Description = string.Empty, CraftingStation = buildStation, AllowedInDungeons = false, Enabled = SmokelessEnable.Value, PieceTable = HammerPieceTable, Icon = basePiece != null ? basePiece.m_icon : null, Requirements = requirements };
+        string localizedName = Token(prefabName, "name");
+        string localizedDescription = Token(prefabName, "description");
+        var config = new PieceConfig { Name = localizedName, Description = localizedDescription, CraftingStation = buildStation, AllowedInDungeons = false, Enabled = SmokelessEnable.Value, PieceTable = HammerPieceTable, Icon = basePiece != null ? basePiece.m_icon : null, Requirements = requirements };
         var customPiece = new CustomPiece(prefabName, basePrefab, config);
-        customPiece.Piece.m_name = displayName;
-        customPiece.Piece.m_description = string.Empty;
+        customPiece.Piece.m_name = localizedName;
+        customPiece.Piece.m_description = localizedDescription;
         if (config.Icon != null) customPiece.Piece.m_icon = config.Icon;
         Fireplace fireplace = customPiece.PiecePrefab.GetComponent<Fireplace>();
         if (fireplace == null) throw new InvalidOperationException(prefabName + " did not inherit a current Fireplace.");
@@ -382,13 +413,15 @@ public sealed class BoneAppetit : BaseUnityPlugin
                 Transform child = source.transform.GetChild(i);
                 if (child != sourceAttach) Instantiate(child.gameObject, target.transform, false);
             }
+            ApplyVisualShader(targetAttach.gameObject, "Custom/Player");
             return;
         }
         GameObject visual = Instantiate(source, target.transform, false);
         visual.name = "BoneAppetitVisual";
-        visual.transform.localPosition = Vector3.zero;
-        visual.transform.localRotation = Quaternion.identity;
-        visual.transform.localScale = Vector3.one;
+        visual.transform.localPosition = source.transform.localPosition;
+        visual.transform.localRotation = source.transform.localRotation;
+        visual.transform.localScale = source.transform.localScale;
+        ApplyVisualShader(visual, "Custom/Creature");
     }
 
     private void ReplacePieceVisual(GameObject target, string visualName)
@@ -397,11 +430,13 @@ public sealed class BoneAppetit : BaseUnityPlugin
         if (oldVisual != null) DestroyImmediate(oldVisual.gameObject);
         foreach (MeshRenderer renderer in target.GetComponentsInChildren<MeshRenderer>(true)) renderer.enabled = false;
         foreach (SkinnedMeshRenderer renderer in target.GetComponentsInChildren<SkinnedMeshRenderer>(true)) renderer.enabled = false;
-        GameObject visual = Instantiate(LoadVisual(visualName), target.transform, false);
+        GameObject source = LoadVisual(visualName);
+        GameObject visual = Instantiate(source, target.transform, false);
         visual.name = "BoneAppetitVisual";
-        visual.transform.localPosition = Vector3.zero;
-        visual.transform.localRotation = Quaternion.identity;
-        visual.transform.localScale = Vector3.one;
+        visual.transform.localPosition = source.transform.localPosition;
+        visual.transform.localRotation = source.transform.localRotation;
+        visual.transform.localScale = source.transform.localScale;
+        ApplyVisualShader(visual, "Custom/Piece");
         foreach (ParticleSystem particle in visual.GetComponentsInChildren<ParticleSystem>(true))
         {
             particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -411,6 +446,18 @@ public sealed class BoneAppetit : BaseUnityPlugin
         foreach (Light light in visual.GetComponentsInChildren<Light>(true)) light.enabled = false;
     }
 
+    private static void ApplyVisualShader(GameObject root, string shaderName)
+    {
+        Shader shader = Shader.Find(shaderName);
+        if (shader == null) return;
+        foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+        {
+            foreach (Material material in renderer.sharedMaterials)
+            {
+                if (material != null) material.shader = shader;
+            }
+        }
+    }
     private static void DisableRenderersAndEffects(GameObject target)
     {
         foreach (Renderer renderer in target.GetComponentsInChildren<Renderer>(true)) renderer.enabled = false;

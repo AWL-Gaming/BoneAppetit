@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.8 - 2026-09-18
+
+### Added
+- Added external JSON localization files so BoneAppetit item and build-piece text can be translated without recompiling the mod.
+
+### Fixed
+- Fixed the Oven and Stone Griddle appearing at the wrong size.
+- Fixed dim or discolored materials on the Chef Hat and smokeless fire pieces.
 ## 3.3.7 - 2026-09-14
 
 ### Fixed

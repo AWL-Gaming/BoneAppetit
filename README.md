@@ -13,7 +13,7 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.7 maintained release
+## AWL 3.3.8 maintained release
 
 - Updated BoneAppetit for current Valheim releases while preserving the original food progression, recipes, drops, cooking stations, and cooking skill behavior.
 - Fixed the Chef Hat so it can be equipped normally again.
@@ -21,6 +21,10 @@ Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own fo
 - Preserved Valharvest compatibility when both mods are installed.
 - Compatible with current Valheim releases and Jotunn 2.30.0.
 - Reconstructed from the published BoneAppetit package while retaining original author attribution and the upstream license.
+
+## Localization
+
+BoneAppetit ships Translations/English.json as the translation template. Copy it to another JSON file in the same folder, keep the token keys unchanged, and translate the values. Jotunn loads the JSON translation files when BoneAppetit starts.
 
 ## Installation
 

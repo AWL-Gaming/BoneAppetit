@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.5
+3.3.8
 
 ## Package requirements
 
@@ -31,3 +31,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.7 runtime release
 
 3.3.7 contains the tested BoneAppetit 3.3.3 plugin binary. This release fixes current Valheim compatibility issues affecting asset loading, Chef Hat equipping, and the Stone Griddle placement requirement while preserving the existing food, recipe, drop, cooking-skill, and Valharvest integration behavior.
+
+## 3.3.8 maintenance release
+
+3.3.8 fixes cooking-station visual scale, current Valheim material lighting, and adds external JSON translations loaded through Jotunn.
