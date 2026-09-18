@@ -1,4 +1,4 @@
-﻿# Publishing BoneAppetit
+# Publishing BoneAppetit
 
 ## Public identities
 
@@ -35,4 +35,3 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.8 maintenance release
 
 3.3.8 fixes cooking-station visual scale, current Valheim material lighting, and adds external JSON translations loaded through Jotunn.
-
