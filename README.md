@@ -13,8 +13,10 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.10 maintained release
+## AWL 3.3.11 maintained release
 
+- Fixed the Stone Grill and Stone Griddle so they can be used normally from around the station.
+- Removed the repetitive Oven chimney smoke effect.
 - Updated BoneAppetit for current Valheim releases while preserving the original food progression, recipes, drops, cooking stations, and cooking skill behavior.
 - Fixed the Chef Hat so it can be equipped normally again.
 - Fixed the Stone Griddle so it no longer incorrectly requires a forge for placement.

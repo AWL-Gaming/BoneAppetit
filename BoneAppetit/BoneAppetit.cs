@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.10";
+    public const string PluginVersion = "3.3.11";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";
@@ -429,6 +429,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         customPiece.Piece.m_craftingStation = null;
 
         RestorePieceShaders(prefab);
+        ConfigureStationInteraction(prefab);
         AddPiece(customPiece);
     }
     private void EnsureGriddleRegistered()
@@ -484,6 +485,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         customPiece.Piece.m_icon = config.Icon;
         if (string.IsNullOrEmpty(buildStation)) customPiece.Piece.m_craftingStation = null;
         ReplacePieceVisual(prefab, visualName);
+        if (prefabName == "rk_grill") ConfigureStationInteraction(prefab);
         AddPiece(customPiece);
     }
 
@@ -517,6 +519,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         StationExtension extension = prefab.GetComponent<StationExtension>();
         if (extension == null) throw new InvalidOperationException(prefabName + " is missing its StationExtension.");
         extension.m_maxStationDistance = 8f;
+        ConfigureOvenEffects(prefab);
 
         AddPiece(customPiece);
     }
@@ -544,6 +547,100 @@ public sealed class BoneAppetit : BaseUnityPlugin
         _pieces.Add(piece.PiecePrefab.name, piece);
     }
 
+    private static void ConfigureStationInteraction(GameObject prefab)
+    {
+        CraftingStation station = prefab.GetComponent<CraftingStation>();
+        if (station == null) return;
+
+        station.m_useDistance = Mathf.Max(station.m_useDistance, 3f);
+
+        Transform existing = prefab.transform.Find("BoneAppetitInteraction");
+        if (existing != null) UnityEngine.Object.DestroyImmediate(existing.gameObject);
+
+        if (!TryGetLocalVisualBounds(prefab, out Bounds visualBounds)) return;
+
+        var interaction = new GameObject("BoneAppetitInteraction");
+        interaction.transform.SetParent(prefab.transform, false);
+        int interactionLayer = LayerMask.NameToLayer("piece_nonsolid");
+        interaction.layer = interactionLayer >= 0 ? interactionLayer : prefab.layer;
+
+        BoxCollider collider = interaction.AddComponent<BoxCollider>();
+        collider.isTrigger = false;
+        collider.center = visualBounds.center;
+        collider.size = new Vector3(
+            Mathf.Max(visualBounds.size.x + 0.3f, 1.2f),
+            Mathf.Max(visualBounds.size.y + 0.4f, 1.4f),
+            Mathf.Max(visualBounds.size.z + 0.3f, 1.2f));
+    }
+
+    private static bool TryGetLocalVisualBounds(GameObject root, out Bounds bounds)
+    {
+        bounds = default;
+        bool found = false;
+
+        foreach (MeshFilter filter in root.GetComponentsInChildren<MeshFilter>(true))
+        {
+            MeshRenderer renderer = filter.GetComponent<MeshRenderer>();
+            Mesh mesh = filter.sharedMesh;
+            if (renderer == null || !renderer.enabled || mesh == null) continue;
+            EncapsulateLocalBounds(root.transform, filter.transform, mesh.bounds, ref bounds, ref found);
+        }
+
+        foreach (SkinnedMeshRenderer renderer in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+            if (!renderer.enabled) continue;
+            EncapsulateLocalBounds(root.transform, renderer.transform, renderer.localBounds, ref bounds, ref found);
+        }
+
+        return found;
+    }
+
+    private static void EncapsulateLocalBounds(Transform root, Transform source, Bounds sourceBounds, ref Bounds result, ref bool found)
+    {
+        Vector3 min = sourceBounds.min;
+        Vector3 max = sourceBounds.max;
+        for (int x = 0; x < 2; ++x)
+        {
+            for (int y = 0; y < 2; ++y)
+            {
+                for (int z = 0; z < 2; ++z)
+                {
+                    Vector3 corner = new Vector3(
+                        x == 0 ? min.x : max.x,
+                        y == 0 ? min.y : max.y,
+                        z == 0 ? min.z : max.z);
+                    Vector3 local = root.InverseTransformPoint(source.TransformPoint(corner));
+                    if (!found)
+                    {
+                        result = new Bounds(local, Vector3.zero);
+                        found = true;
+                    }
+                    else
+                    {
+                        result.Encapsulate(local);
+                    }
+                }
+            }
+        }
+    }
+    private static void ConfigureOvenEffects(GameObject prefab)
+    {
+        foreach (ParticleSystem particle in prefab.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            if (!string.Equals(particle.gameObject.name, "steam", StringComparison.OrdinalIgnoreCase)) continue;
+
+            ParticleSystem.MainModule main = particle.main;
+            main.loop = false;
+            main.playOnAwake = false;
+
+            ParticleSystem.EmissionModule emission = particle.emission;
+            emission.enabled = false;
+
+            particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null) renderer.enabled = false;
+        }
+    }
     private void ReplaceItemVisual(GameObject target, string visualName)
     {
         DisableRenderersAndEffects(target);
@@ -741,6 +838,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         if (_pieces.TryGetValue("rk_grill", out CustomPiece grill) && _appliedOriginalGrill != GrillOriginal.Value)
         {
             ReplacePieceVisual(grill.PiecePrefab, GrillOriginal.Value ? "rk_grill_original" : "rk_grill_custom");
+            ConfigureStationInteraction(grill.PiecePrefab);
             _appliedOriginalGrill = GrillOriginal.Value;
         }
     }
