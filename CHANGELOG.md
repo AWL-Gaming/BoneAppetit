@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.11 - 2026-09-19
+
+### Fixed
+- Fixed the Stone Grill and Stone Griddle interaction areas so they can be used normally from around the station.
+- Removed the Oven's repetitive chimney smoke effect.
+
 ## 3.3.10 - 2026-09-19
 
 ### Fixed
