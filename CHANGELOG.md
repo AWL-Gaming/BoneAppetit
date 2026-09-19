@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.10 - 2026-09-19
+
+### Fixed
+- Fixed the Oven showing Invalid Placement and refusing to build.
+- Restored the Oven's original placement, collision, and material setup so it behaves correctly in the game.
+- Fixed an error that could appear when leaving the game after BoneAppetit was loaded.
+
 ## 3.3.9 - 2026-09-18
 
 ### Added

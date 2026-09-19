@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.9
+3.3.10
 
 ## Package requirements
 
@@ -39,3 +39,8 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.9 maintenance release
 
 3.3.9 fixes localization token resolution and translation-file loading, corrects Chef Hat and smokeless-fire material lighting, fixes the Oven scale, and restores the Stone Griddle as its own buildable networked piece at the original size.
+
+
+## 3.3.10 maintenance release
+
+3.3.10 fixes the Oven showing Invalid Placement, restores its original placement and material behavior, and fixes an error that could appear when leaving the game after BoneAppetit was loaded.

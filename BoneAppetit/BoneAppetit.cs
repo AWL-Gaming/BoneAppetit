@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.9";
+    public const string PluginVersion = "3.3.10";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";
@@ -178,8 +178,10 @@ public sealed class BoneAppetit : BaseUnityPlugin
         SynchronizationManager.OnConfigurationSynchronized -= OnConfigurationSynchronized;
         PieceManager.OnPiecesRegistered -= EnsureGriddleRegistered;
         _harmony?.UnpatchSelf();
-        _assets?.Unload(false);
-        _legacyGrillAssets?.Unload(false);
+        if (_assets) _assets.Unload(false);
+        if (_legacyGrillAssets) _legacyGrillAssets.Unload(false);
+        _assets = null;
+        _legacyGrillAssets = null;
         if (ReferenceEquals(Instance, this)) Instance = null;
     }
 
@@ -487,17 +489,35 @@ public sealed class BoneAppetit : BaseUnityPlugin
 
     private void RegisterOven()
     {
-        string localizedName = Token("rk_oven", "name");
-        string localizedDescription = Token("rk_oven", "description");
-        var config = new PieceConfig { Name = localizedName, Description = localizedDescription, CraftingStation = string.Empty, AllowedInDungeons = false, Enabled = true, PieceTable = HammerPieceTable, ExtendStation = "rk_grill", Icon = LoadSprite("piece_icon_rk_oven"), Requirements = new[] { Req("SurtlingCore", 2), Req("TrophySurtling", 1), Req("Stone", 10) } };
-        var customPiece = new CustomPiece("rk_oven", "cauldron_ext1_spice", config);
+        const string prefabName = "rk_oven";
+        string localizedName = Token(prefabName, "name");
+        string localizedDescription = Token(prefabName, "description");
+        var config = new PieceConfig
+        {
+            Name = localizedName,
+            Description = localizedDescription,
+            CraftingStation = string.Empty,
+            AllowedInDungeons = false,
+            Enabled = true,
+            PieceTable = HammerPieceTable,
+            ExtendStation = "rk_grill",
+            Icon = LoadSprite("piece_icon_rk_oven"),
+            Requirements = new[] { Req("SurtlingCore", 2), Req("TrophySurtling", 1), Req("Stone", 10) }
+        };
+
+        GameObject prefab = _legacyGrillAssets.LoadAsset<GameObject>(prefabName);
+        if (prefab == null) throw new InvalidOperationException("Missing original BoneAppetit prefab " + prefabName);
+
+        var customPiece = new CustomPiece(prefab, true, config);
         customPiece.Piece.m_name = localizedName;
         customPiece.Piece.m_description = localizedDescription;
         customPiece.Piece.m_icon = config.Icon;
-        StationExtension extension = customPiece.PiecePrefab.GetComponent<StationExtension>();
-        if (extension == null) throw new InvalidOperationException("rk_oven did not inherit a current StationExtension.");
+        customPiece.Piece.m_craftingStation = null;
+
+        StationExtension extension = prefab.GetComponent<StationExtension>();
+        if (extension == null) throw new InvalidOperationException(prefabName + " is missing its StationExtension.");
         extension.m_maxStationDistance = 8f;
-        ReplacePieceVisual(customPiece.PiecePrefab, "rk_oven");
+
         AddPiece(customPiece);
     }
 
