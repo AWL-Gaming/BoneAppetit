@@ -1,8 +1,8 @@
 {
   "name": "BoneAppetit",
-  "version_number": "3.3.11",
+  "version_number": "3.3.12",
   "website_url": "https://github.com/AWL-Gaming/BoneAppetit",
-  "description": "BoneAppetit foods and cooking stations, maintained for current Valheim by AWL Gaming.",
+  "description": "BoneAppetit foods and cooking stations, maintained for Valheim by AWL Gaming.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2350",
     "ValheimModding-Jotunn-2.30.0"

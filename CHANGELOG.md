@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.12 - 2026-09-19
+
+### Fixed
+- Fixed a client crash when using the Stone Grill.
+- Fixed the Stone Grill interaction area so the full station can be targeted and used in multiplayer.
+- Restored the Oven's chimney smoke, internal fire, and lighting.
+- Fixed the Oven's fire and smoke repeatedly restarting during use and removed the extra looping effect that could appear while using the Stone Grill.
+
 ## 3.3.11 - 2026-09-19
 
 ### Fixed

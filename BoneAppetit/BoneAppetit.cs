@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.11";
+    public const string PluginVersion = "3.3.12";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";
@@ -96,7 +96,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         PrefabManager.OnVanillaPrefabsAvailable += RegisterRuntimeContent;
         ItemManager.OnItemsRegistered += AddDrops;
         SynchronizationManager.OnConfigurationSynchronized += OnConfigurationSynchronized;
-        PieceManager.OnPiecesRegistered += EnsureGriddleRegistered;
+        PieceManager.OnPiecesRegistered += EnsureCookingStationsRegistered;
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginGUID);
         Logger.LogInfo("BoneAppetit modern runtime initialized.");
     }
@@ -176,7 +176,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         PrefabManager.OnVanillaPrefabsAvailable -= RegisterRuntimeContent;
         ItemManager.OnItemsRegistered -= AddDrops;
         SynchronizationManager.OnConfigurationSynchronized -= OnConfigurationSynchronized;
-        PieceManager.OnPiecesRegistered -= EnsureGriddleRegistered;
+        PieceManager.OnPiecesRegistered -= EnsureCookingStationsRegistered;
         _harmony?.UnpatchSelf();
         if (_assets) _assets.Unload(false);
         if (_legacyGrillAssets) _legacyGrillAssets.Unload(false);
@@ -432,9 +432,15 @@ public sealed class BoneAppetit : BaseUnityPlugin
         ConfigureStationInteraction(prefab);
         AddPiece(customPiece);
     }
-    private void EnsureGriddleRegistered()
+    private void EnsureCookingStationsRegistered()
     {
-        if (!_pieces.TryGetValue("rk_griddle", out CustomPiece customPiece) || customPiece?.PiecePrefab == null)
+        EnsurePieceRegistered("rk_grill", "Stone Grill");
+        EnsurePieceRegistered("rk_griddle", "Stone Griddle");
+    }
+
+    private void EnsurePieceRegistered(string prefabName, string displayName)
+    {
+        if (!_pieces.TryGetValue(prefabName, out CustomPiece customPiece) || customPiece?.PiecePrefab == null)
         {
             return;
         }
@@ -443,7 +449,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         PieceTable hammer = PieceManager.Instance.GetPieceTable(HammerPieceTable);
         if (hammer == null)
         {
-            Logger.LogWarning("Stone Griddle could not find the Hammer piece table during late registration.");
+            Logger.LogWarning(displayName + " could not find the Hammer piece table during late registration.");
             return;
         }
 
@@ -462,11 +468,10 @@ public sealed class BoneAppetit : BaseUnityPlugin
             addedToZNet = true;
         }
 
-        Logger.LogInfo("Stone Griddle late registration: hammer=" + hammer.m_pieces.Contains(prefab) +
+        Logger.LogInfo(displayName + " late registration: hammer=" + hammer.m_pieces.Contains(prefab) +
             ", znet=" + (ZNetScene.instance != null && ZNetScene.instance.GetPrefab(prefab.name) != null) +
             ", repairedHammer=" + addedToHammer + ", repairedZNet=" + addedToZNet + ".");
     }
-
     private void RegisterCraftingStation(string prefabName, string displayName, string buildStation, bool requiresFire, string visualName, params RequirementConfig[] requirements)
     {
         string localizedName = Token(prefabName, "name");
@@ -517,13 +522,43 @@ public sealed class BoneAppetit : BaseUnityPlugin
         customPiece.Piece.m_craftingStation = null;
 
         StationExtension extension = prefab.GetComponent<StationExtension>();
+        WearNTear wear = prefab.GetComponent<WearNTear>();
         if (extension == null) throw new InvalidOperationException(prefabName + " is missing its StationExtension.");
+        if (wear == null) throw new InvalidOperationException(prefabName + " is missing its WearNTear.");
         extension.m_maxStationDistance = 8f;
-        ConfigureOvenEffects(prefab);
+        wear.m_wet = null;
+        ConfigureOvenVisuals(prefab);
 
         AddPiece(customPiece);
     }
 
+    private static void ConfigureOvenVisuals(GameObject prefab)
+    {
+        foreach (Transform transform in prefab.GetComponentsInChildren<Transform>(true))
+        {
+            if (transform.name == "flames" || transform.name == "FireWarmth" || transform.name == "Point light" || transform.name == "steam")
+            {
+                transform.gameObject.SetActive(true);
+            }
+        }
+
+        foreach (ParticleSystem particle in prefab.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            if (particle.gameObject.name != "flames" && particle.gameObject.name != "steam") continue;
+
+            ParticleSystem.MainModule main = particle.main;
+            main.loop = true;
+            main.playOnAwake = true;
+
+            ParticleSystem.EmissionModule emission = particle.emission;
+            emission.enabled = true;
+
+            ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null) renderer.enabled = true;
+        }
+
+        if (prefab.GetComponent<OvenVisualState>() == null) prefab.AddComponent<OvenVisualState>();
+    }
     private void RegisterSmokelessFire(string prefabName, string displayName, string basePrefab, string buildStation, string visualName, params RequirementConfig[] requirements)
     {
         Piece basePiece = PrefabManager.Instance.GetPrefab(basePrefab)?.GetComponent<Piece>();
@@ -621,24 +656,6 @@ public sealed class BoneAppetit : BaseUnityPlugin
                     }
                 }
             }
-        }
-    }
-    private static void ConfigureOvenEffects(GameObject prefab)
-    {
-        foreach (ParticleSystem particle in prefab.GetComponentsInChildren<ParticleSystem>(true))
-        {
-            if (!string.Equals(particle.gameObject.name, "steam", StringComparison.OrdinalIgnoreCase)) continue;
-
-            ParticleSystem.MainModule main = particle.main;
-            main.loop = false;
-            main.playOnAwake = false;
-
-            ParticleSystem.EmissionModule emission = particle.emission;
-            emission.enabled = false;
-
-            particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
-            if (renderer != null) renderer.enabled = false;
         }
     }
     private void ReplaceItemVisual(GameObject target, string visualName)
@@ -909,4 +926,38 @@ public sealed class BoneAppetit : BaseUnityPlugin
 
     private static RequirementConfig ToRequirementConfig(RequirementDefinition definition) => new RequirementConfig { Item = definition.Item, Amount = definition.Amount, Recover = definition.Recover };
     private static RequirementConfig Req(string item, int amount) => new RequirementConfig { Item = item, Amount = amount, Recover = true };
+}
+
+internal sealed class OvenVisualState : MonoBehaviour
+{
+    private void Start()
+    {
+        RefreshLights();
+        Invoke(nameof(RefreshLights), 0.2f);
+    }
+
+    private void RefreshLights()
+    {
+        foreach (Light light in GetComponentsInChildren<Light>(true))
+        {
+            light.gameObject.SetActive(true);
+            LightLod lightLod = light.GetComponent<LightLod>();
+            if (lightLod != null)
+            {
+                lightLod.enabled = false;
+                Destroy(lightLod);
+            }
+            light.enabled = true;
+        }
+    }
+}
+
+[HarmonyPatch(typeof(StationExtension), nameof(StationExtension.StartConnectionEffect), new Type[] { typeof(Vector3), typeof(float) })]
+internal static class OvenExtensionConnectionPatch
+{
+    private static bool Prefix(StationExtension __instance)
+    {
+        if (__instance == null || __instance.gameObject == null) return true;
+        return __instance.gameObject.name.Replace("(Clone)", string.Empty) != "rk_oven";
+    }
 }

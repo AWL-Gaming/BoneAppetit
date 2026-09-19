@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.11
+3.3.12
 
 ## Package requirements
 
@@ -30,11 +30,11 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 
 ## 3.3.7 runtime release
 
-3.3.7 contains the tested BoneAppetit 3.3.3 plugin binary. This release fixes current Valheim compatibility issues affecting asset loading, Chef Hat equipping, and the Stone Griddle placement requirement while preserving the existing food, recipe, drop, cooking-skill, and Valharvest integration behavior.
+3.3.7 contains the tested BoneAppetit 3.3.3 plugin binary. This release fixes Valheim compatibility issues affecting asset loading, Chef Hat equipping, and the Stone Griddle placement requirement while preserving the existing food, recipe, drop, cooking-skill, and Valharvest integration behavior.
 
 ## 3.3.8 maintenance release
 
-3.3.8 fixes cooking-station visual scale, current Valheim material lighting, and adds external JSON translations loaded through Jotunn.
+3.3.8 fixes cooking-station visual scale, material lighting in the game, and adds external JSON translations loaded through Jotunn.
 
 ## 3.3.9 maintenance release
 
@@ -45,6 +45,6 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 
 3.3.10 fixes the Oven showing Invalid Placement, restores its original placement and material behavior, and fixes an error that could appear when leaving the game after BoneAppetit was loaded.
 
-## 3.3.11 maintenance release
+## 3.3.12 maintenance release
 
-3.3.11 fixes Stone Grill and Stone Griddle interaction around the stations and removes the repetitive Oven chimney smoke effect.
+3.3.12 fixes a Stone Grill client crash and interaction targeting, restores the Oven's smoke, fire, and lighting, and fixes the Oven effects repeatedly restarting or looping during use.

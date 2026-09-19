@@ -1,8 +1,8 @@
 # BoneAppetit
 
-**AWL Gaming maintained compatibility build for current Valheim releases.**
+**AWL Gaming maintained compatibility build for Valheim.**
 
-BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains this build because the published 3.3.1 package provides content that is still used by current modpacks but required compatibility work for current Valheim. AWL Gaming does not claim authorship of the original foods, stations, assets, recipes, balance, or gameplay design.
+BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains this build because the published 3.3.1 package provides content that is still used by Valheim modpacks but needed compatibility fixes. AWL Gaming does not claim authorship of the original foods, stations, assets, recipes, balance, or gameplay design.
 
 ## What it adds
 
@@ -13,11 +13,10 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.11 maintained release
+## AWL 3.3.12 maintained release
 
-- Fixed the Stone Grill and Stone Griddle so they can be used normally from around the station.
-- Removed the repetitive Oven chimney smoke effect.
-- Updated BoneAppetit for current Valheim releases while preserving the original food progression, recipes, drops, cooking stations, and cooking skill behavior.
+- Fixed a client crash when using the Stone Grill and fixed its interaction area in multiplayer.
+- Restored the Oven's chimney smoke, internal fire, and lighting, and fixed the effects repeatedly restarting during use.
 - Fixed the Chef Hat so it can be equipped normally again.
 - Fixed the Stone Griddle so it no longer incorrectly requires a forge for placement.
 - Fixed the Oven showing Invalid Placement and restored its original placement, collision, and material behavior.
@@ -25,8 +24,7 @@ Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own fo
 - Restored the Stone Griddle to the Hammer/build lists at its original size and fixed the Oven scale.
 - Fixed localization token display and translation-file loading for normal and flattened mod-manager installs.
 - Fixed dim or discolored materials on the Chef Hat and smokeless fire pieces.
-- Preserved Valharvest compatibility when both mods are installed.
-- Compatible with current Valheim releases and Jotunn 2.30.0.
+- Compatible with Valheim and Jotunn 2.30.0.
 - Reconstructed from the published BoneAppetit package while retaining original author attribution and the upstream license.
 
 ## Localization
@@ -57,7 +55,7 @@ The original project README is retained in the source repository as `README_UPST
 
 ## Source and build
 
-The maintained source is public in the AWL repository above. Build requirements are .NET Framework 4.7.2 targeting support, BepInEx core assemblies, Jotunn, and current Valheim managed assemblies.
+The maintained source is public in the AWL repository above. Build requirements are .NET Framework 4.7.2 targeting support, BepInEx core assemblies, Jotunn, and the game's managed assemblies.
 
 ```powershell
 dotnet build .\BoneAppetit.csproj -c Release
