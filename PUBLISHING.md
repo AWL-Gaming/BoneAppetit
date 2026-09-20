@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.12
+3.3.13
 
 ## Package requirements
 
@@ -48,3 +48,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.12 maintenance release
 
 3.3.12 fixes a Stone Grill client crash and interaction targeting, restores the Oven's smoke, fire, and lighting, and fixes the Oven effects repeatedly restarting or looping during use.
+
+## 3.3.13 maintenance release
+
+3.3.13 fixes the Stone Grill becoming unplaceable after removing or moving it, fixes the Prep Table sometimes failing to appear as a buildable piece, and improves build-piece registration reliability for BoneAppetit cooking stations.

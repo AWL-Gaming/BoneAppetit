@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.12";
+    public const string PluginVersion = "3.3.13";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";
@@ -436,6 +436,34 @@ public sealed class BoneAppetit : BaseUnityPlugin
     {
         EnsurePieceRegistered("rk_grill", "Stone Grill");
         EnsurePieceRegistered("rk_griddle", "Stone Griddle");
+        EnsurePieceRegistered("rk_prep", "Prep Table");
+        EnsurePieceRegistered("rk_oven", "Oven");
+        EnsurePieceRegistered("rk_campfire", "Smokeless Firepit");
+        EnsurePieceRegistered("rk_hearth", "Smokeless Hearth");
+        EnsurePieceRegistered("rk_brazier", "Smokeless Brazier");
+        EnsureBuildStationResolved("rk_grill", "forge", "Stone Grill");
+        EnsureBuildStationResolved("rk_prep", "forge", "Prep Table");
+        EnsureBuildStationResolved("rk_hearth", "piece_stonecutter", "Smokeless Hearth");
+        EnsureBuildStationResolved("rk_brazier", "forge", "Smokeless Brazier");
+    }
+
+    private void EnsureBuildStationResolved(string prefabName, string stationPrefabName, string displayName)
+    {
+        if (!_pieces.TryGetValue(prefabName, out CustomPiece customPiece) || customPiece?.PiecePrefab == null) return;
+
+        Piece piece = customPiece.Piece;
+        GameObject stationPrefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(stationPrefabName) : null;
+        if (stationPrefab == null) stationPrefab = PrefabManager.Instance.GetPrefab(stationPrefabName);
+        CraftingStation buildStation = stationPrefab != null ? stationPrefab.GetComponent<CraftingStation>() : null;
+        if (piece == null || buildStation == null)
+        {
+            Logger.LogWarning(displayName + " could not resolve build station " + stationPrefabName + " during late registration.");
+            return;
+        }
+
+        bool repaired = piece.m_craftingStation != buildStation;
+        piece.m_craftingStation = buildStation;
+        if (repaired) Logger.LogInfo(displayName + " repaired build station reference to " + stationPrefabName + ".");
     }
 
     private void EnsurePieceRegistered(string prefabName, string displayName)

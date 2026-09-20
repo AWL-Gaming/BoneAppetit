@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.13 - 2026-09-20
+
+### Fixed
+- Fixed the Stone Grill becoming unplaceable after removing or moving an existing one.
+- Fixed the Prep Table sometimes failing to appear as a buildable piece after loading.
+- Improved build-piece registration reliability for BoneAppetit cooking stations.
+
 ## 3.3.12 - 2026-09-19
 
 ### Fixed

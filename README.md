@@ -13,8 +13,11 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.12 maintained release
+## AWL 3.3.13 maintained release
 
+- Fixed the Stone Grill becoming unplaceable after removing or moving an existing one.
+- Fixed the Prep Table sometimes failing to appear as a buildable piece after loading.
+- Improved build-piece registration reliability for BoneAppetit cooking stations.
 - Fixed a client crash when using the Stone Grill and fixed its interaction area in multiplayer.
 - Restored the Oven's chimney smoke, internal fire, and lighting, and fixed the effects repeatedly restarting during use.
 - Fixed the Chef Hat so it can be equipped normally again.
