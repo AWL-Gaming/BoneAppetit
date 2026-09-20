@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.13
+3.3.14
 
 ## Package requirements
 
@@ -52,3 +52,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.13 maintenance release
 
 3.3.13 fixes the Stone Grill becoming unplaceable after removing or moving it, fixes the Prep Table sometimes failing to appear as a buildable piece, and improves build-piece registration reliability for BoneAppetit cooking stations.
+
+## 3.3.14 maintenance release
+
+3.3.14 fixes the Smokeless Firepit, Smokeless Hearth, and Smokeless Brazier still producing smoke.

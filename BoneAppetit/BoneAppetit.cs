@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.13";
+    public const string PluginVersion = "3.3.14";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";
@@ -599,9 +599,31 @@ public sealed class BoneAppetit : BaseUnityPlugin
         if (config.Icon != null) customPiece.Piece.m_icon = config.Icon;
         Fireplace fireplace = customPiece.PiecePrefab.GetComponent<Fireplace>();
         if (fireplace == null) throw new InvalidOperationException(prefabName + " did not inherit a current Fireplace.");
-        fireplace.m_smokeSpawner = null;
         ReplacePieceVisual(customPiece.PiecePrefab, visualName);
+        DisableSmokeEmission(customPiece.PiecePrefab, fireplace);
         AddPiece(customPiece);
+    }
+
+    private static void DisableSmokeEmission(GameObject prefab, Fireplace fireplace)
+    {
+        fireplace.m_smokeSpawner = null;
+
+        foreach (SmokeSpawner spawner in prefab.GetComponentsInChildren<SmokeSpawner>(true))
+        {
+            spawner.enabled = false;
+        }
+
+        foreach (ParticleSystem particle in prefab.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            if (particle.gameObject.name.IndexOf("smoke", StringComparison.OrdinalIgnoreCase) < 0) continue;
+
+            particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            ParticleSystem.EmissionModule emission = particle.emission;
+            emission.enabled = false;
+
+            ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null) renderer.enabled = false;
+        }
     }
 
     private void AddPiece(CustomPiece piece)

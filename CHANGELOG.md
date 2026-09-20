@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.14 - 2026-09-20
+
+### Fixed
+- Fixed the Smokeless Firepit, Smokeless Hearth, and Smokeless Brazier still producing smoke.
+
 ## 3.3.13 - 2026-09-20
 
 ### Fixed
