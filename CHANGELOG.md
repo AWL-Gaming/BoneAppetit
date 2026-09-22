@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.15 - 2026-09-22
+
+### Fixed
+- Fixed the Stone Grill sometimes refusing to place after the 3.3.14 update, including after removing and rebuilding it near an Oven.
+
 ## 3.3.14 - 2026-09-20
 
 ### Fixed

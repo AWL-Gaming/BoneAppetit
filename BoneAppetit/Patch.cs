@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using HarmonyLib;
 using Jotunn;
+using UnityEngine;
 
 namespace Boneappetit;
 
@@ -43,5 +45,36 @@ internal static class Patch
                 Logger.LogError(ex);
             }
         }
+    }
+}
+[HarmonyPatch(typeof(Player), "TestGhostClipping")]
+internal static class GrillPlacementClippingPatch
+{
+    private static void Prefix(GameObject ghost, out Collider[] __state)
+    {
+        __state = Array.Empty<Collider>();
+        if (ghost == null) return;
+
+        __state = ghost.GetComponentsInChildren<Collider>(true)
+            .Where(collider => collider != null && collider.enabled && collider.gameObject.name == "BoneAppetitInteraction")
+            .ToArray();
+
+        foreach (Collider collider in __state)
+        {
+            collider.enabled = false;
+        }
+    }
+
+    private static Exception Finalizer(Exception __exception, Collider[] __state)
+    {
+        if (__state != null)
+        {
+            foreach (Collider collider in __state)
+            {
+                if (collider != null) collider.enabled = true;
+            }
+        }
+
+        return __exception;
     }
 }

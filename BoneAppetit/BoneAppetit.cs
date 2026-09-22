@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.14";
+    public const string PluginVersion = "3.3.15";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";

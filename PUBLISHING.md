@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.14
+3.3.15
 
 ## Package requirements
 
@@ -56,3 +56,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.14 maintenance release
 
 3.3.14 fixes the Smokeless Firepit, Smokeless Hearth, and Smokeless Brazier still producing smoke.
+
+## 3.3.15 maintenance release
+
+3.3.15 fixes the Stone Grill sometimes refusing to place after the 3.3.14 update, including after removing and rebuilding it near an Oven.

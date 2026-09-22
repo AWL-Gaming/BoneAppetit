@@ -13,8 +13,9 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.14 maintained release
+## AWL 3.3.15 maintained release
 
+- Fixed the Stone Grill sometimes refusing to place after the 3.3.14 update, including after removing and rebuilding it near an Oven.
 - Fixed the Smokeless Firepit, Smokeless Hearth, and Smokeless Brazier still producing smoke.
 - Fixed the Stone Grill becoming unplaceable after removing or moving an existing one.
 - Fixed the Prep Table sometimes failing to appear as a buildable piece after loading.
