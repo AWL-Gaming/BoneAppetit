@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.15";
+    public const string PluginVersion = "3.3.16";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string AssetRoot = "assets/boneappetit6000";
@@ -750,6 +750,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         visual.transform.localRotation = source.transform.localRotation;
         visual.transform.localScale = source.transform.localScale * ((visualName == "rk_oven" || visualName == "rk_griddle") ? 0.6f : 1f);
         RestorePieceShaders(visual);
+        visual.AddComponent<PieceVisualShaderState>();
         foreach (ParticleSystem particle in visual.GetComponentsInChildren<ParticleSystem>(true))
         {
             particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -759,11 +760,47 @@ public sealed class BoneAppetit : BaseUnityPlugin
         foreach (Light light in visual.GetComponentsInChildren<Light>(true)) light.enabled = false;
     }
 
-    private static void RestorePieceShaders(GameObject root)
+    private static readonly Dictionary<string, Shader> ResolvedShaders = new Dictionary<string, Shader>(StringComparer.Ordinal);
+
+    private static Shader ResolveLoadedShader(string shaderName)
     {
-        Shader staticRock = Shader.Find("Custom/StaticRock");
-        Shader standardTwoSided = Shader.Find("Standard TwoSided");
-        Shader standardSpecular = Shader.Find("Standard (Specular setup)");
+        if (ResolvedShaders.TryGetValue(shaderName, out Shader cached) && cached != null) return cached;
+
+        Shader shader = Shader.Find(shaderName);
+        if (shader == null)
+        {
+            foreach (Shader loaded in Resources.FindObjectsOfTypeAll<Shader>())
+            {
+                if (loaded != null && string.Equals(loaded.name, shaderName, StringComparison.Ordinal))
+                {
+                    shader = loaded;
+                    break;
+                }
+            }
+        }
+
+        if (shader == null)
+        {
+            foreach (Material material in Resources.FindObjectsOfTypeAll<Material>())
+            {
+                if (material != null && material.shader != null &&
+                    string.Equals(material.shader.name, shaderName, StringComparison.Ordinal))
+                {
+                    shader = material.shader;
+                    break;
+                }
+            }
+        }
+
+        if (shader != null) ResolvedShaders[shaderName] = shader;
+        return shader;
+    }
+    internal static void RestorePieceShaders(GameObject root)
+    {
+        Shader piece = ResolveLoadedShader("Custom/Piece");
+        Shader staticRock = ResolveLoadedShader("Custom/StaticRock");
+        Shader standardTwoSided = ResolveLoadedShader("Standard TwoSided");
+        Shader standardSpecular = ResolveLoadedShader("Standard (Specular setup)");
 
         foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
         {
@@ -772,7 +809,13 @@ public sealed class BoneAppetit : BaseUnityPlugin
                 if (material == null) continue;
                 string name = material.name;
 
-                if ((name.StartsWith("stone_", StringComparison.Ordinal) ||
+                if ((name.StartsWith("HearthNew_mat", StringComparison.Ordinal) ||
+                     name.StartsWith("HearthBroken_mat", StringComparison.Ordinal)) &&
+                    piece != null)
+                {
+                    material.shader = piece;
+                }
+                else if ((name.StartsWith("stone_", StringComparison.Ordinal) ||
                      name.StartsWith("stones_", StringComparison.Ordinal) ||
                      name.StartsWith("GriddleRock", StringComparison.Ordinal)) &&
                     staticRock != null)
@@ -977,6 +1020,21 @@ public sealed class BoneAppetit : BaseUnityPlugin
     private static RequirementConfig ToRequirementConfig(RequirementDefinition definition) => new RequirementConfig { Item = definition.Item, Amount = definition.Amount, Recover = definition.Recover };
     private static RequirementConfig Req(string item, int amount) => new RequirementConfig { Item = item, Amount = amount, Recover = true };
 }
+
+internal sealed class PieceVisualShaderState : MonoBehaviour
+{
+    private void Start()
+    {
+        RefreshShaders();
+        Invoke(nameof(RefreshShaders), 0.2f);
+    }
+
+    private void RefreshShaders()
+    {
+        BoneAppetit.RestorePieceShaders(gameObject);
+    }
+}
+
 
 internal sealed class OvenVisualState : MonoBehaviour
 {

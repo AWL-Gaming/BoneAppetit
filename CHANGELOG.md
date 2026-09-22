@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.16 - 2026-09-22
+
+### Fixed
+- Fixed the Smokeless Hearth showing incorrect or broken colors and materials.
+- Fixed the Prep Table showing incorrect or broken colors and materials.
+
 ## 3.3.15 - 2026-09-22
 
 ### Fixed

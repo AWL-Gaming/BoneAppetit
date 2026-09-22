@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.15
+3.3.16
 
 ## Package requirements
 
@@ -60,3 +60,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.15 maintenance release
 
 3.3.15 fixes the Stone Grill sometimes refusing to place after the 3.3.14 update, including after removing and rebuilding it near an Oven.
+
+## 3.3.16 maintenance release
+
+3.3.16 fixes incorrect or broken materials and colors on the Smokeless Hearth and Prep Table.
