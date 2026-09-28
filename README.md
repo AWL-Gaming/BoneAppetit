@@ -13,7 +13,7 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.17 maintained release
+## AWL 3.3.18 maintained release
 
 - Fixed remaining broken textures on BoneAppetit item models, including eggs and dragon eggs.
 - Fixed item visual effects that could render incorrectly after shader conversion.
