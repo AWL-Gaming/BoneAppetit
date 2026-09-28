@@ -13,26 +13,10 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.16 maintained release
+## AWL 3.3.17 maintained release
 
-- Fixed the Smokeless Hearth showing incorrect or broken colors and materials.
-- Fixed the Prep Table showing incorrect or broken colors and materials.
-- Fixed the Stone Grill sometimes refusing to place after the 3.3.14 update, including after removing and rebuilding it near an Oven.
-- Fixed the Smokeless Firepit, Smokeless Hearth, and Smokeless Brazier still producing smoke.
-- Fixed the Stone Grill becoming unplaceable after removing or moving an existing one.
-- Fixed the Prep Table sometimes failing to appear as a buildable piece after loading.
-- Improved build-piece registration reliability for BoneAppetit cooking stations.
-- Fixed a client crash when using the Stone Grill and fixed its interaction area in multiplayer.
-- Restored the Oven's chimney smoke, internal fire, and lighting, and fixed the effects repeatedly restarting during use.
-- Fixed the Chef Hat so it can be equipped normally again.
-- Fixed the Stone Griddle so it no longer incorrectly requires a forge for placement.
-- Fixed the Oven showing Invalid Placement and restored its original placement, collision, and material behavior.
-- Fixed an error that could appear when leaving the game after BoneAppetit was loaded.
-- Restored the Stone Griddle to the Hammer/build lists at its original size and fixed the Oven scale.
-- Fixed localization token display and translation-file loading for normal and flattened mod-manager installs.
-- Fixed dim or discolored materials on the Chef Hat and smokeless fire pieces.
-- Compatible with Valheim and Jotunn 2.30.0.
-- Reconstructed from the published BoneAppetit package while retaining original author attribution and the upstream license.
+- Fixed remaining broken textures on BoneAppetit item models, including eggs and dragon eggs.
+- Fixed item visual effects that could render incorrectly after shader conversion.
 
 ## Localization
 
