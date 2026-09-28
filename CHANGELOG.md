@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.17 - 2026-09-28
+
+### Fixed
+- Fixed remaining broken textures on BoneAppetit item models, including eggs and dragon eggs.
+- Fixed item visual effects that could render incorrectly after shader conversion.
+
 ## 3.3.16 - 2026-09-22
 
 ### Fixed

@@ -23,18 +23,21 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.16";
+    public const string PluginVersion = "3.3.17";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
+    private const string LegacyFoodResourceName = "BoneAppetit.customfood";
     private const string AssetRoot = "assets/boneappetit6000";
     private const string HammerPieceTable = "_HammerPieceTable";
 
     private readonly Dictionary<string, CustomItem> _items = new Dictionary<string, CustomItem>(StringComparer.Ordinal);
     private readonly Dictionary<string, CustomPiece> _pieces = new Dictionary<string, CustomPiece>(StringComparer.Ordinal);
     private readonly Dictionary<ConeEffect, SE_Stats> _coneEffects = new Dictionary<ConeEffect, SE_Stats>();
+    private readonly Dictionary<string, Texture2D> _legacyTextures = new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
     private Harmony _harmony;
     private AssetBundle _assets;
     private AssetBundle _legacyGrillAssets;
+    private AssetBundle _legacyFoodAssets;
     private bool _dropsApplied;
     private bool _addingExtraItem;
     private bool? _appliedOriginalGrill;
@@ -86,11 +89,13 @@ public sealed class BoneAppetit : BaseUnityPlugin
         CreateConfigValues();
         _assets = LoadEmbeddedAssetBundle(BundleResourceName);
         _legacyGrillAssets = LoadEmbeddedAssetBundle(LegacyGrillResourceName);
-        if (_assets == null || _legacyGrillAssets == null)
+        _legacyFoodAssets = LoadEmbeddedAssetBundle(LegacyFoodResourceName);
+        if (_assets == null || _legacyGrillAssets == null || _legacyFoodAssets == null)
         {
             Logger.LogError("BoneAppetit could not load its Unity 6000 asset bundle.");
             return;
         }
+        BuildLegacyTextureMap();
         CookingSprite = LoadSprite("icon_rk_chef");
         AddCookingSkill();
         PrefabManager.OnVanillaPrefabsAvailable += RegisterRuntimeContent;
@@ -180,8 +185,11 @@ public sealed class BoneAppetit : BaseUnityPlugin
         _harmony?.UnpatchSelf();
         if (_assets) _assets.Unload(false);
         if (_legacyGrillAssets) _legacyGrillAssets.Unload(false);
+        if (_legacyFoodAssets) _legacyFoodAssets.Unload(false);
         _assets = null;
         _legacyGrillAssets = null;
+        _legacyFoodAssets = null;
+        _legacyTextures.Clear();
         if (ReferenceEquals(Instance, this)) Instance = null;
     }
 
@@ -708,6 +716,84 @@ public sealed class BoneAppetit : BaseUnityPlugin
             }
         }
     }
+    private void BuildLegacyTextureMap()
+    {
+        _legacyTextures.Clear();
+        foreach (UnityEngine.Object asset in _legacyFoodAssets.LoadAllAssets())
+        {
+            if (asset is Texture2D texture)
+            {
+                _legacyTextures[LegacyTextureKey(texture.name)] = texture;
+                continue;
+            }
+
+            if (asset is not GameObject gameObject) continue;
+            foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
+            {
+                foreach (Material material in renderer.sharedMaterials)
+                {
+                    if (material == null) continue;
+                    foreach (string propertyName in material.GetTexturePropertyNames())
+                    {
+                        if (material.GetTexture(propertyName) is Texture2D materialTexture)
+                        {
+                            _legacyTextures[LegacyTextureKey(materialTexture.name)] = materialTexture;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void RestoreLegacyTextures(GameObject root)
+    {
+        foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+        {
+            foreach (Material material in renderer.sharedMaterials)
+            {
+                if (material == null) continue;
+                foreach (string propertyName in material.GetTexturePropertyNames())
+                {
+                    Texture current = material.GetTexture(propertyName);
+                    if (current == null) continue;
+                    if (_legacyTextures.TryGetValue(LegacyTextureKey(current.name), out Texture2D legacyTexture))
+                    {
+                        material.SetTexture(propertyName, legacyTexture);
+                    }
+                }
+            }
+        }
+    }
+
+    private static string LegacyTextureKey(string textureName)
+    {
+        if (string.IsNullOrEmpty(textureName)) return string.Empty;
+
+        int suffix = textureName.LastIndexOf("_0000", StringComparison.OrdinalIgnoreCase);
+        if (suffix >= 0 && suffix + 5 < textureName.Length)
+        {
+            bool isExportSuffix = true;
+            for (int i = suffix + 5; i < textureName.Length; ++i)
+            {
+                if (!Uri.IsHexDigit(textureName[i]))
+                {
+                    isExportSuffix = false;
+                    break;
+                }
+            }
+            if (isExportSuffix) textureName = textureName.Substring(0, suffix);
+        }
+
+        char[] normalized = new char[textureName.Length];
+        int count = 0;
+        foreach (char c in textureName)
+        {
+            if (!char.IsLetterOrDigit(c)) continue;
+            normalized[count++] = char.ToLowerInvariant(c);
+        }
+        return new string(normalized, 0, count);
+    }
+
     private void ReplaceItemVisual(GameObject target, string visualName)
     {
         DisableRenderersAndEffects(target);
@@ -727,6 +813,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
                 if (child != sourceAttach) Instantiate(child.gameObject, target.transform, false);
             }
             ApplyVisualShader(targetAttach.gameObject, "Custom/Creature");
+            RestoreLegacyTextures(targetAttach.gameObject);
             return;
         }
         GameObject visual = Instantiate(source, target.transform, false);
@@ -735,6 +822,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
         visual.transform.localRotation = source.transform.localRotation;
         visual.transform.localScale = source.transform.localScale;
         ApplyVisualShader(visual, "Custom/Creature");
+        RestoreLegacyTextures(visual);
     }
 
     private void ReplacePieceVisual(GameObject target, string visualName)
@@ -835,10 +923,11 @@ public sealed class BoneAppetit : BaseUnityPlugin
     }
     private static void ApplyVisualShader(GameObject root, string shaderName)
     {
-        Shader shader = Shader.Find(shaderName);
+        Shader shader = ResolveLoadedShader(shaderName);
         if (shader == null) return;
         foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
         {
+            if (renderer is ParticleSystemRenderer) continue;
             foreach (Material material in renderer.sharedMaterials)
             {
                 if (material != null) material.shader = shader;
