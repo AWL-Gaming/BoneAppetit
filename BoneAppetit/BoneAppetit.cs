@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.20";
+    public const string PluginVersion = "3.3.21";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string LegacyFoodResourceName = "BoneAppetit.customfood";
@@ -739,10 +739,68 @@ public sealed class BoneAppetit : BaseUnityPlugin
         // Keep BoneAppetit's original smokeless models while retaining the modern
         // vanilla Fireplace, fire effects, lighting, and placement components.
         ReplacePieceVisual(customPiece.PiecePrefab, visualName);
+        RestoreSmokelessMaterials(customPiece.PiecePrefab, PrefabManager.Instance.GetPrefab(basePrefab));
         DisableSmokeEmission(customPiece.PiecePrefab, fireplace);
         TuneSmokelessFireEffects(customPiece.PiecePrefab, prefabName);
         RemoveSmokelessFuelPuffs(fireplace);
         AddPiece(customPiece);
+    }
+
+    private void RestoreSmokelessMaterials(GameObject prefab, GameObject vanilla)
+    {
+        Transform visual = prefab.transform.Find("BoneAppetitVisual");
+        if (visual == null || vanilla == null) return;
+
+        // The converted bundle does not retain every shader property and keyword.
+        // Use complete current-game materials on the original fireplace meshes.
+        foreach (ShaderReplacerNew replacer in visual.GetComponentsInChildren<ShaderReplacerNew>(true))
+            DestroyImmediate(replacer);
+        foreach (PieceVisualShaderState refresher in visual.GetComponentsInChildren<PieceVisualShaderState>(true))
+            DestroyImmediate(refresher);
+
+        var nativeMaterials = new Dictionary<string, Material>(StringComparer.Ordinal);
+        foreach (GameObject source in new[] { vanilla, PrefabManager.Instance.GetPrefab("fire_pit") })
+        {
+            if (source == null) continue;
+            foreach (MeshRenderer renderer in source.GetComponentsInChildren<MeshRenderer>(true))
+            foreach (Material material in renderer.sharedMaterials)
+            {
+                if (material == null) continue;
+                string key = LegacyTextureKey(material.name);
+                if (!nativeMaterials.ContainsKey(key)) nativeMaterials.Add(key, material);
+            }
+        }
+
+        var restoredMaterials = new Dictionary<string, Material>(StringComparer.Ordinal);
+        int restored = 0;
+        int missing = 0;
+        foreach (MeshRenderer renderer in visual.GetComponentsInChildren<MeshRenderer>(true))
+        {
+            Material[] materials = renderer.sharedMaterials;
+            for (int i = 0; i < materials.Length; ++i)
+            {
+                Material original = materials[i];
+                if (original == null) continue;
+                string key = LegacyTextureKey(original.name);
+                if (key == "fireplaceashquadglow") key = "fireplaceashglowing";
+                if (!nativeMaterials.TryGetValue(key, out Material native))
+                {
+                    ++missing;
+                    Logger.LogWarning("No current fireplace material found for " + original.name + ".");
+                    continue;
+                }
+                if (!restoredMaterials.TryGetValue(key, out Material replacement))
+                {
+                    replacement = new Material(native) { name = native.name };
+                    restoredMaterials.Add(key, replacement);
+                }
+                materials[i] = replacement;
+                ++restored;
+            }
+            renderer.sharedMaterials = materials;
+        }
+        Logger.LogInfo("Restored current fireplace materials for " + prefab.name +
+            ": slots=" + restored + ", unmatched=" + missing + ".");
     }
 
     private static void DisableSmokeEmission(GameObject prefab, Fireplace fireplace)

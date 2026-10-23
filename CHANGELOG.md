@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.21 - 2026-10-23
+
+### Fixed
+- Fixed black or incorrectly lit Smokeless Firepit and Hearth surfaces.
+- Fixed the Smokeless Brazier's pale, wood-like appearance and restored its metal finish.
+- Corrected ash transparency and glowing embers on the smokeless fireplaces.
+
 ## 3.3.20 - 2026-10-23
 
 ### Fixed
