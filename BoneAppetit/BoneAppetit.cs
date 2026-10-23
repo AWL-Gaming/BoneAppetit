@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.19";
+    public const string PluginVersion = "3.3.20";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string LegacyFoodResourceName = "BoneAppetit.customfood";
@@ -134,30 +134,56 @@ public sealed class BoneAppetit : BaseUnityPlugin
 
     private void LoadTranslations()
     {
-        string pluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
-        string translationsDirectory = Path.Combine(pluginDirectory, "Translations");
-        var translationFiles = new List<string>();
+        string dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+        if (string.IsNullOrEmpty(dllDirectory)) return;
 
-        if (Directory.Exists(translationsDirectory))
+        // Manual installs can put the DLL directly in shared BepInEx/plugins.
+        // Never scan another plugin's translations or shared Assets directories.
+        bool flat = string.Equals(
+            Path.GetFileName(dllDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)),
+            "plugins", StringComparison.OrdinalIgnoreCase);
+        var candidates = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        string[] ownedDirectories = flat
+            ? new[] { Path.Combine(dllDirectory, "AWLGaming-BoneAppetit"), Path.Combine(dllDirectory, "BoneAppetit") }
+            : new[] { dllDirectory };
+
+        foreach (string ownedDirectory in ownedDirectories)
         {
-            translationFiles.AddRange(Directory.GetFiles(translationsDirectory, "*.json", SearchOption.AllDirectories));
+            if (!Directory.Exists(ownedDirectory)) continue;
+            string translationsDirectory = Path.Combine(ownedDirectory, "Translations");
+            if (Directory.Exists(translationsDirectory))
+            {
+                foreach (string file in Directory.GetFiles(translationsDirectory, "*.json", SearchOption.AllDirectories))
+                    candidates[file] = translationsDirectory;
+            }
+
+            foreach (string file in Directory.GetFiles(ownedDirectory, "*.json", SearchOption.TopDirectoryOnly))
+            {
+                if (!string.Equals(Path.GetFileName(file), "manifest.json", StringComparison.OrdinalIgnoreCase))
+                    candidates[file] = translationsDirectory;
+            }
         }
 
-        translationFiles.AddRange(
-            Directory.GetFiles(pluginDirectory, "*.json", SearchOption.TopDirectoryOnly)
-                .Where(file => !string.Equals(Path.GetFileName(file), "manifest.json", StringComparison.OrdinalIgnoreCase)));
+        // Flat manual installs can use BoneAppetit.English.json beside the DLL.
+        // No other root-level JSON file belongs to BoneAppetit.
+        if (flat)
+        {
+            foreach (string file in Directory.GetFiles(dllDirectory, "BoneAppetit.*.json", SearchOption.TopDirectoryOnly))
+                candidates[file] = Path.Combine(dllDirectory, "Translations");
+        }
 
-        foreach (string file in translationFiles.Distinct(StringComparer.OrdinalIgnoreCase))
+        foreach (KeyValuePair<string, string> entry in candidates)
         {
             try
             {
-                string language = ResolveTranslationLanguage(file, translationsDirectory);
-                LocalizationManager.Instance.AddJson(language, File.ReadAllText(file));
-                Logger.LogInfo("BoneAppetit loaded " + language + " translations from " + Path.GetFileName(file) + ".");
+                string language = ResolveTranslationLanguage(entry.Key, entry.Value);
+                LocalizationManager.Instance.AddJson(language, File.ReadAllText(entry.Key));
+                Logger.LogInfo("BoneAppetit loaded " + language + " translations from " + Path.GetFileName(entry.Key) + ".");
             }
             catch (Exception ex)
             {
-                Logger.LogWarning("BoneAppetit could not load translation file " + Path.GetFileName(file) + ": " + ex.Message);
+                Logger.LogWarning("BoneAppetit could not load translation file " + Path.GetFileName(entry.Key) + ": " + ex.Message);
             }
         }
     }
@@ -714,6 +740,8 @@ public sealed class BoneAppetit : BaseUnityPlugin
         // vanilla Fireplace, fire effects, lighting, and placement components.
         ReplacePieceVisual(customPiece.PiecePrefab, visualName);
         DisableSmokeEmission(customPiece.PiecePrefab, fireplace);
+        TuneSmokelessFireEffects(customPiece.PiecePrefab, prefabName);
+        RemoveSmokelessFuelPuffs(fireplace);
         AddPiece(customPiece);
     }
 
@@ -728,8 +756,11 @@ public sealed class BoneAppetit : BaseUnityPlugin
 
         foreach (ParticleSystem particle in prefab.GetComponentsInChildren<ParticleSystem>(true))
         {
-            // The native "smok_small" particle is a flame, not smoke.
-            if (particle.gameObject.name.IndexOf("smoke", StringComparison.OrdinalIgnoreCase) < 0) continue;
+            // The inherited low_flames effect renders like opaque white smoke on these pieces.
+            // Keep the other native flames, sparks, warmth, and fire light.
+            string effectName = particle.gameObject.name;
+            if (effectName.IndexOf("smoke", StringComparison.OrdinalIgnoreCase) < 0 &&
+                !string.Equals(effectName, "low_flames", StringComparison.OrdinalIgnoreCase)) continue;
 
             particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             ParticleSystem.EmissionModule emission = particle.emission;
@@ -738,6 +769,47 @@ public sealed class BoneAppetit : BaseUnityPlugin
             ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
             if (renderer != null) renderer.enabled = false;
         }
+    }
+
+    private static void TuneSmokelessFireEffects(GameObject prefab, string prefabName)
+    {
+        // Retain the existing native fire effects. On the smokeless Hearth and
+        // Brazier, the high-quality flame sprites are oversized for the custom meshes.
+        // Limit their size without suppressing flames, sparks, or lighting.
+        if (prefabName != "rk_hearth" && prefabName != "rk_brazier") return;
+
+        foreach (ParticleSystem particle in prefab.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            if (!particle.gameObject.name.StartsWith("flames", StringComparison.OrdinalIgnoreCase)) continue;
+            ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
+            if (renderer == null || renderer.sharedMaterial == null ||
+                !renderer.sharedMaterial.name.StartsWith("flameball_flipbook_gradient", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            ParticleSystem.MainModule main = particle.main;
+            main.startSize = main.startSize.constant * 0.55f;
+            if (prefabName == "rk_hearth")
+            {
+                // The inherited Hearth effect emits 200 large sprites a second.
+                ParticleSystem.EmissionModule emission = particle.emission;
+                emission.rateOverTime = Mathf.Min(35f, emission.rateOverTime.constant);
+            }
+        }
+    }
+
+    private static void RemoveSmokelessFuelPuffs(Fireplace fireplace)
+    {
+        // Fueling keeps its native sound, but the vanilla fuel-added smoke
+        // burst must not appear on the smokeless fire pieces.
+        EffectList.EffectData[] effects = fireplace.m_fuelAddedEffects.m_effectPrefabs;
+        if (effects == null || effects.Length == 0) return;
+
+        fireplace.m_fuelAddedEffects.m_effectPrefabs = effects.Where(effect =>
+        {
+            string name = effect?.m_prefab != null ? effect.m_prefab.name : string.Empty;
+            return !string.Equals(name, "vfx_FireAddFuel", StringComparison.Ordinal) &&
+                   !string.Equals(name, "vfx_HearthAddFuel", StringComparison.Ordinal);
+        }).ToArray();
     }
 
     private void AddPiece(CustomPiece piece)
@@ -1011,6 +1083,13 @@ public sealed class BoneAppetit : BaseUnityPlugin
                     piece != null && piece.isSupported)
                 {
                     material.shader = piece;
+                }
+                if (name.StartsWith("Brazier_Mat", StringComparison.Ordinal))
+                {
+                    // Recover the original metallic response after the Unity shader replacement.
+                    if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", 1f);
+                    if (material.HasProperty("_MetallicAlphaGloss")) material.SetFloat("_MetallicAlphaGloss", 0.711f);
+                    if (material.HasProperty("_MetalColor")) material.SetColor("_MetalColor", Color.white);
                 }
                 else if ((name.StartsWith("stone_", StringComparison.Ordinal) ||
                      name.StartsWith("stones_", StringComparison.Ordinal) ||

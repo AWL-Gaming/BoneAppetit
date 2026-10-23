@@ -13,15 +13,16 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.19 maintained release
+## AWL 3.3.20 maintained release
 
-- Fixed the Better Clubs conflict that left the Stone Grill without recipes and stopped the Oven connecting correctly.
-- Fixed the Oven's flames and steam showing up pink.
-- Fixed incorrect material rendering on the Smokeless Hearth and Smokeless Brazier.
+- Smokeless Firepit, Hearth, and Brazier no longer produce smoke puffs when adding fuel.
+- Corrected oversized and smoke-like flame effects on the Smokeless Hearth and Brazier.
+- Restored the Smokeless Brazier's metallic appearance.
+- Fixed BoneAppetit loading other mods' translation files in manual installations.
 
 ## Localization
 
-BoneAppetit ships Translations/English.json as the translation template. Copy it to another JSON file, keep the token keys unchanged, and translate the values. Translation JSON files can be loaded from the Translations folder or beside BoneAppetit.dll so they continue to work with mod managers that flatten package folders.
+BoneAppetit ships Translations/English.json as a translation template. Keep token keys unchanged when translating. Files inside the dedicated BoneAppetit mod folder can be loaded from Translations/ or beside its DLL. For manual installs with BoneAppetit.dll directly under BepInEx/plugins, put files in BepInEx/plugins/BoneAppetit/Translations, BepInEx/plugins/AWLGaming-BoneAppetit/Translations, or use names such as BoneAppetit.French.json directly in BepInEx/plugins. BoneAppetit does not scan translation files belonging to other mods.
 
 ## Installation
 

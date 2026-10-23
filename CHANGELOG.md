@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.20 - 2026-10-23
+
+### Fixed
+- Removed smoke puffs when adding fuel to the Smokeless Firepit, Hearth, and Brazier.
+- Corrected oversized and smoke-like flame effects on the Smokeless Hearth and Brazier.
+- Restored the Smokeless Brazier's metallic appearance.
+- Prevented BoneAppetit from loading other mods' translations during manual installations.
+
 ## 3.3.19 - 2026-10-23
 
 ### Fixed
