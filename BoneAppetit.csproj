@@ -44,6 +44,10 @@
       <HintPath>$(ValheimManagedDir)\assembly_utils.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="netstandard">
+      <HintPath>$(ValheimManagedDir)\netstandard.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(ValheimManagedDir)\UnityEngine.dll</HintPath>
       <Private>false</Private>

@@ -23,7 +23,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 {
     public const string PluginGUID = "com.rockerkitten.boneappetit";
     public const string PluginName = "BoneAppetit";
-    public const string PluginVersion = "3.3.18";
+    public const string PluginVersion = "3.3.19";
     private const string BundleResourceName = "BoneAppetit.assets";
     private const string LegacyGrillResourceName = "BoneAppetit.grill";
     private const string LegacyFoodResourceName = "BoneAppetit.customfood";
@@ -453,6 +453,41 @@ public sealed class BoneAppetit : BaseUnityPlugin
         EnsureBuildStationResolved("rk_prep", "forge", "Prep Table");
         EnsureBuildStationResolved("rk_hearth", "piece_stonecutter", "Smokeless Hearth");
         EnsureBuildStationResolved("rk_brazier", "forge", "Smokeless Brazier");
+        RepairGrillStationReferences();
+    }
+
+    private void RepairGrillStationReferences()
+    {
+        if (!_pieces.TryGetValue("rk_grill", out CustomPiece grill) || grill?.PiecePrefab == null) return;
+        CraftingStation registeredGrill = grill.PiecePrefab.GetComponent<CraftingStation>();
+        if (registeredGrill == null) return;
+
+        int repairedRecipes = 0;
+        foreach (ItemDefinition definition in BoneAppetitData.Items)
+        {
+            if (definition.Recipe == null || definition.Recipe.Station != "rk_grill") continue;
+            if (!_items.TryGetValue(definition.Prefab, out CustomItem item) || item?.Recipe?.Recipe == null) continue;
+            Recipe recipe = item.Recipe.Recipe;
+            if (recipe.m_craftingStation == registeredGrill) continue;
+            recipe.m_craftingStation = registeredGrill;
+            repairedRecipes++;
+        }
+
+        bool repairedOven = false;
+        if (_pieces.TryGetValue("rk_oven", out CustomPiece oven) && oven?.PiecePrefab != null)
+        {
+            StationExtension extension = oven.PiecePrefab.GetComponent<StationExtension>();
+            if (extension != null && extension.m_craftingStation != registeredGrill)
+            {
+                extension.m_craftingStation = registeredGrill;
+                repairedOven = true;
+            }
+        }
+
+        if (repairedRecipes > 0 || repairedOven)
+        {
+            Logger.LogInfo("Repaired Grill station references: recipes=" + repairedRecipes + ", oven=" + repairedOven + ".");
+        }
     }
 
     private void EnsureBuildStationResolved(string prefabName, string stationPrefabName, string displayName)
@@ -594,7 +629,75 @@ public sealed class BoneAppetit : BaseUnityPlugin
         }
 
         if (prefab.GetComponent<OvenVisualState>() == null) prefab.AddComponent<OvenVisualState>();
+        RepairOvenParticleShaders(prefab);
     }
+    internal static void RepairOvenParticleShaders(GameObject oven)
+    {
+        if (Application.isBatchMode || oven == null) return;
+
+        foreach (ParticleSystemRenderer renderer in oven.GetComponentsInChildren<ParticleSystemRenderer>(true))
+        {
+            string effect = renderer.gameObject.name;
+            if (effect != "flames" && effect != "steam") continue;
+
+            Material original = renderer.sharedMaterial;
+            if (original == null || (original.shader != null && original.shader.isSupported)) continue;
+
+            Material vanilla = FindSupportedVanillaParticle(effect == "steam");
+            if (vanilla == null)
+            {
+                renderer.enabled = false;
+                Instance?.Logger.LogWarning("Oven " + effect + " effect hidden because no supported particle shader was available.");
+                continue;
+            }
+
+            Material fixedMaterial = new Material(vanilla) { name = "BoneAppetit Oven " + effect };
+            if (original.HasProperty("_MainTex") && fixedMaterial.HasProperty("_MainTex"))
+            {
+                fixedMaterial.SetTexture("_MainTex", original.GetTexture("_MainTex"));
+            }
+
+            if (original.HasProperty("_TintColor"))
+            {
+                Color tint = original.GetColor("_TintColor");
+                if (fixedMaterial.HasProperty("_TintColor")) fixedMaterial.SetColor("_TintColor", tint);
+                else if (fixedMaterial.HasProperty("_Color")) fixedMaterial.SetColor("_Color", tint);
+            }
+
+            renderer.sharedMaterial = fixedMaterial;
+            renderer.enabled = true;
+            Instance?.Logger.LogInfo("Oven " + effect + " now uses supported vanilla particle shader " + fixedMaterial.shader.name + ".");
+        }
+    }
+
+    private static Material FindSupportedVanillaParticle(bool smoke)
+    {
+        Material fallback = null;
+        foreach (string prefabName in new[] { "fire_pit", "hearth", "bonfire" })
+        {
+            GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
+            if (prefab == null) continue;
+
+            foreach (ParticleSystemRenderer renderer in prefab.GetComponentsInChildren<ParticleSystemRenderer>(true))
+            {
+                Material material = renderer.sharedMaterial;
+                if (material == null || material.shader == null || !material.shader.isSupported ||
+                    !material.HasProperty("_MainTex")) continue;
+
+                if (fallback == null) fallback = material;
+                string name = renderer.gameObject.name;
+                if (smoke && (name.IndexOf("smoke", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                              name.IndexOf("steam", StringComparison.OrdinalIgnoreCase) >= 0))
+                    return material;
+                if (!smoke && (name.IndexOf("fire", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                               name.IndexOf("flame", StringComparison.OrdinalIgnoreCase) >= 0))
+                    return material;
+            }
+        }
+
+        return fallback;
+    }
+
     private void RegisterSmokelessFire(string prefabName, string displayName, string basePrefab, string buildStation, string visualName, params RequirementConfig[] requirements)
     {
         Piece basePiece = PrefabManager.Instance.GetPrefab(basePrefab)?.GetComponent<Piece>();
@@ -607,6 +710,8 @@ public sealed class BoneAppetit : BaseUnityPlugin
         if (config.Icon != null) customPiece.Piece.m_icon = config.Icon;
         Fireplace fireplace = customPiece.PiecePrefab.GetComponent<Fireplace>();
         if (fireplace == null) throw new InvalidOperationException(prefabName + " did not inherit a current Fireplace.");
+        // Keep BoneAppetit's original smokeless models while retaining the modern
+        // vanilla Fireplace, fire effects, lighting, and placement components.
         ReplacePieceVisual(customPiece.PiecePrefab, visualName);
         DisableSmokeEmission(customPiece.PiecePrefab, fireplace);
         AddPiece(customPiece);
@@ -623,6 +728,7 @@ public sealed class BoneAppetit : BaseUnityPlugin
 
         foreach (ParticleSystem particle in prefab.GetComponentsInChildren<ParticleSystem>(true))
         {
+            // The native "smok_small" particle is a flame, not smoke.
             if (particle.gameObject.name.IndexOf("smoke", StringComparison.OrdinalIgnoreCase) < 0) continue;
 
             particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -898,8 +1004,11 @@ public sealed class BoneAppetit : BaseUnityPlugin
                 string name = material.name;
 
                 if ((name.StartsWith("HearthNew_mat", StringComparison.Ordinal) ||
-                     name.StartsWith("HearthBroken_mat", StringComparison.Ordinal)) &&
-                    piece != null)
+                     name.StartsWith("HearthBroken_mat", StringComparison.Ordinal) ||
+                     name.StartsWith("HearthAshes_mat", StringComparison.Ordinal) ||
+                     name.StartsWith("HearthAshesBurn_mat", StringComparison.Ordinal) ||
+                     name.StartsWith("Brazier_Mat", StringComparison.Ordinal)) &&
+                    piece != null && piece.isSupported)
                 {
                     material.shader = piece;
                 }
@@ -1135,6 +1244,7 @@ internal sealed class OvenVisualState : MonoBehaviour
 
     private void RefreshLights()
     {
+        BoneAppetit.RepairOvenParticleShaders(gameObject);
         foreach (Light light in GetComponentsInChildren<Light>(true))
         {
             light.gameObject.SetActive(true);

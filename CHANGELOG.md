@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.19 - 2026-10-23
+
+### Fixed
+- Fixed Better Clubs compatibility that could hide Stone Grill recipes and block the Oven connection.
+- Fixed the Oven's flames and steam showing up pink.
+- Fixed Smokeless Hearth ash and Smokeless Brazier metal materials displaying incorrectly.
+
 ## 3.3.18 - 2026-09-28
 
 ### Fixed

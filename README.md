@@ -13,10 +13,11 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.18 maintained release
+## AWL 3.3.19 maintained release
 
-- Fixed remaining broken textures on BoneAppetit item models, including eggs and dragon eggs.
-- Fixed item visual effects that could render incorrectly after shader conversion.
+- Fixed the Better Clubs conflict that left the Stone Grill without recipes and stopped the Oven connecting correctly.
+- Fixed the Oven's flames and steam showing up pink.
+- Fixed incorrect material rendering on the Smokeless Hearth and Smokeless Brazier.
 
 ## Localization
 

@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.16
+3.3.19
 
 ## Package requirements
 
@@ -64,3 +64,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 ## 3.3.16 maintenance release
 
 3.3.16 fixes incorrect or broken materials and colors on the Smokeless Hearth and Prep Table.
+
+## 3.3.19 maintenance release
+
+3.3.19 fixes the Better Clubs Grill recipe and Oven connection conflict, pink Oven flames and steam, and Smokeless Hearth/Brazier materials.
