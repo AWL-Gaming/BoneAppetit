@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.22 - 2026-10-23
+
+### Fixed
+- Fixed installation paths for manual installs and mod managers.
+
 ## 3.3.21 - 2026-10-23
 
 ### Fixed

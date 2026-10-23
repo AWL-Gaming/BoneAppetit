@@ -12,7 +12,7 @@ This is an AWL-maintained compatibility release of the original BoneAppetit by R
 
 ## Current version
 
-3.3.21
+3.3.22
 
 ## Package requirements
 
@@ -79,3 +79,7 @@ Thunderstore and Hexium versions are immutable. Bump the package version for any
 3.3.21 fixes dark Smokeless Firepit/Hearth surfaces and incorrect Smokeless Brazier materials, including transparent ashes and glowing embers.
 
 GitHub uses the manual-install BoneAppetit_v3.3.21.zip with AWLGaming-BoneAppetit/ and INSTALL.txt. Thunderstore and Hexium use their separate *_thunderstore.zip and *_hexium.zip packages with store metadata at the archive root.
+
+## 3.3.22 package revision
+
+3.3.22 retains the tested 3.3.21 plugin and corrects ZIP entry separators for portable manual and store installation. All archive entry paths must use forward slashes, with no backslashes, absolute paths or parent traversal. GitHub receives BoneAppetit_v3.3.22.zip; each store receives its separate package.
