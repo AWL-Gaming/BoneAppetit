@@ -13,12 +13,11 @@ BoneAppetit was originally created by **RockerKitten**. AWL Gaming maintains thi
 
 Valharvest integrates with BoneAppetit but does not replace BoneAppetit's own foods or stations.
 
-## AWL 3.3.20 maintained release
+## AWL 3.3.21 maintained release
 
-- Smokeless Firepit, Hearth, and Brazier no longer produce smoke puffs when adding fuel.
-- Corrected oversized and smoke-like flame effects on the Smokeless Hearth and Brazier.
-- Restored the Smokeless Brazier's metallic appearance.
-- Fixed BoneAppetit loading other mods' translation files in manual installations.
+- Fixed black or incorrectly lit Smokeless Firepit and Hearth surfaces.
+- Fixed the Smokeless Brazier's pale, wood-like appearance and restored its metal finish.
+- Corrected ash transparency and glowing embers on the smokeless fireplaces.
 
 ## Localization
 
